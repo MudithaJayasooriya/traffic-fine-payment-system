@@ -36,7 +36,7 @@ function Dashboard() {
 
         <div className="mb-8 grid gap-6 md:grid-cols-2">
 
-          <div className="group rounded-[24px] border border-[#1f4f78]/60 bg-[#07223a]/85 p-6 shadow-[0_18px_44px_rgba(0,0,0,0.28)] transition duration-200 hover:-translate-y-1 hover:border-[#7bd5ff] hover:shadow-[0_24px_60px_rgba(0,0,0,0.38)]">
+          <div className="group rounded-3xl border border-[#1f4f78]/60 bg-[#07223a]/85 p-6 shadow-[0_18px_44px_rgba(0,0,0,0.28)] transition duration-200 hover:-translate-y-1 hover:border-[#7bd5ff] hover:shadow-[0_24px_60px_rgba(0,0,0,0.38)]">
             <div className="flex items-center justify-between gap-3">
               <h2 className="text-xl font-bold text-[#fff4e5]">
                 Pending Fines
@@ -55,7 +55,7 @@ function Dashboard() {
             </p>
           </div>
 
-          <div className="group rounded-[24px] border border-[#1f4f78]/60 bg-[#07223a]/85 p-6 shadow-[0_18px_44px_rgba(0,0,0,0.28)] transition duration-200 hover:-translate-y-1 hover:border-[#7bd5ff] hover:shadow-[0_24px_60px_rgba(0,0,0,0.38)]">
+          <div className="group rounded-3xl border border-[#1f4f78]/60 bg-[#07223a]/85 p-6 shadow-[0_18px_44px_rgba(0,0,0,0.28)] transition duration-200 hover:-translate-y-1 hover:border-[#7bd5ff] hover:shadow-[0_24px_60px_rgba(0,0,0,0.38)]">
             <div className="flex items-center justify-between gap-3">
               <h2 className="text-xl font-bold text-[#fff4e5]">
                 Paid Fines
