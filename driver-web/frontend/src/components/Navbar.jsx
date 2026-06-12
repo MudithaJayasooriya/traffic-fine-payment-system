@@ -7,10 +7,11 @@ import {
   FaHome,
   FaQuestionCircle,
   FaSearch,
-  FaSignOutAlt,
   FaTimes,
   FaHistory,
   FaUserCircle,
+  FaBell, 
+  FaSignOutAlt
 } from "react-icons/fa";
 
 function Navbar() {
@@ -72,7 +73,16 @@ function Navbar() {
                 {label}
               </NavLink>
             ))}
+<Link
+    to="/notifications"
+    className="relative"
+  >
+    <FaBell className="text-lg" />
 
+    <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs">
+      2
+    </span>
+  </Link>
             <Link
               to="/"
               className="inline-flex items-center gap-2 rounded-2xl border border-[#0f4f78]/40 bg-transparent px-4 py-2 font-bold text-[#eaf6ff] shadow-[0_6px_18px_rgba(0,0,0,0.06)] transition duration-200 hover:-translate-y-0.5 hover:bg-[#021622]"
@@ -85,7 +95,7 @@ function Navbar() {
 
         <div
           className={`mt-4 overflow-hidden rounded-[28px] border border-[#042033]/55 bg-[#021622]/95 transition-all duration-300 md:hidden ${
-            menuOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+            menuOpen ? "max-h-125 opacity-100" : "max-h-0 opacity-0"
           }`}
         >
           <div className="flex flex-col gap-2 p-3">
@@ -98,8 +108,8 @@ function Navbar() {
                   [
                     "flex items-center justify-between rounded-2xl border px-4 py-3 text-sm font-semibold transition",
                     isActive
-                      ? "border-[#7fc3ff] bg-[#cfeeff] text-[#021022]"
-                      : "border-transparent bg-transparent text-[#021022]",
+                      ? "border-[#0f4f78] bg-[#0b3a5a] text-[#eaf6ff]"
+                      : "border-transparent bg-transparent text-[#eaf6ff]",
                   ].join(" ")
                 }
               >
