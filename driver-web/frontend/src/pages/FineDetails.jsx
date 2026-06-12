@@ -74,7 +74,7 @@ function FineDetails() {
             <div className="mt-8 flex justify-end">
               <Link
                 to={`/payment/${fine.id}`}
-                className="inline-flex items-center gap-2 rounded-2xl border border-[#2b6fb0]/40 bg-[#4aa3ff] px-6 py-3 font-bold text-[#021022] shadow-[0_16px_30px_rgba(74,163,255,0.18)] transition duration-200 hover:-translate-y-0.5 hover:bg-[#66b8ff]"
+                className="inline-flex items-center gap-2 rounded-3xl border border-[#2b6fb0]/40 bg-[#4aa3ff] px-6 py-3 font-bold text-[#021022] shadow-[0_16px_30px_rgba(74,163,255,0.18)] transition duration-200 hover:-translate-y-0.5 hover:bg-[#66b8ff]"
               >
                 Pay Now
                 <FaArrowRight className="text-xs" />
