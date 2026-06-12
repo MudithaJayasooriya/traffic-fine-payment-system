@@ -24,7 +24,7 @@ function PaymentHistory() {
             </div>
           </div>
 
-          <div className="mt-8 overflow-hidden rounded-[24px] border border-[#1f4f78]/60 bg-[#062033]/90 shadow-[0_18px_44px_rgba(0,0,0,0.24)]">
+          <div className="mt-8 overflow-hidden rounded-3xl border border-[#1f4f78]/60 bg-[#062033]/90 shadow-[0_18px_44px_rgba(0,0,0,0.24)]">
             <table className="w-full border-collapse text-left text-sm text-[#cfeeff]">
               <thead className="bg-[#07233f] text-[#eaf6ff]">
                 <tr>
