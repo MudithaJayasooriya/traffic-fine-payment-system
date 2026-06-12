@@ -18,6 +18,9 @@ public class User {
     @Column(unique = true, nullable = false)
     private String username;
 
+    @Column(unique = true)
+    private String email;
+
     @Column(nullable = false)
     private String password;
 
@@ -25,7 +28,7 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
-    // Optional additional metadata for traffic context
+
     private String badgeNumber;
     private String district;
 }
