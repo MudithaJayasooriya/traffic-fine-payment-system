@@ -35,6 +35,9 @@ public class AuthService {
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(Role.DRIVER);
+        // Map new fields
+        user.setNicNumber(request.getNicNumber());
+        user.setPhoneNumber(request.getPhoneNumber());
 
         userRepository.save(user);
 
@@ -46,7 +49,6 @@ public class AuthService {
     public String registerOfficerByAdmin(RegisterRequest request) {
         String inputUsername = request.getUsername();
 
-        // Validates that the Admin included both the name and badge number layout
         if (inputUsername == null || !inputUsername.contains("_")) {
             throw new IllegalArgumentException("Invalid username format. Officer username must include both name and badge number separated by an underscore (e.g., 'perera_B8831').");
         }
@@ -56,10 +58,13 @@ public class AuthService {
         }
 
         User officer = new User();
-        officer.setUsername(inputUsername); // Unified composite field: e.g., "perera_B8831"
+        officer.setUsername(inputUsername);
         officer.setEmail(request.getEmail());
         officer.setPassword(passwordEncoder.encode(request.getPassword()));
         officer.setRole(Role.OFFICER);
+        // Map new fields
+        officer.setNicNumber(request.getNicNumber());
+        officer.setPhoneNumber(request.getPhoneNumber());
 
         userRepository.save(officer);
         return "Traffic Officer registered successfully with username: " + inputUsername;

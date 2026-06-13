@@ -32,6 +32,12 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    // Added fields
+    @Column(unique = true)
+    private String nicNumber;
+
+    private String phoneNumber;
+
     // 1. Maps your custom Enum role into Spring Security's authorization authorities
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -51,21 +57,21 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return true; // Set to true so accounts don't immediately look expired
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true; // Set to true so accounts aren't locked by default
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true; // Set to true so credentials stay active
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return true; // Set to true so users are active immediately
+        return true;
     }
 }
