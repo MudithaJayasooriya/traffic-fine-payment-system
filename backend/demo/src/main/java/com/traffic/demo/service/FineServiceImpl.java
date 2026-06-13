@@ -2,10 +2,10 @@ package com.traffic.demo.service;
 
 import com.traffic.demo.dto.CreateFineRequest;
 import com.traffic.demo.dto.FineResponse;
-import com.traffic.demo.entity.Category;
 import com.traffic.demo.entity.Fine;
+import com.traffic.demo.entity.FineCategory;
 import com.traffic.demo.exception.FineNotFoundException;
-import com.traffic.demo.repository.CategoryRepository;
+import com.traffic.demo.repository.FineCategoryRepository;
 import com.traffic.demo.repository.FineRepository;
 import org.springframework.stereotype.Service;
 
@@ -16,11 +16,11 @@ import java.util.UUID;
 public class FineServiceImpl implements FineService {
 
     private final FineRepository fineRepository;
-    private final CategoryRepository categoryRepository;
+    private final FineCategoryRepository categoryRepository;
 
     public FineServiceImpl(
             FineRepository fineRepository,
-            CategoryRepository categoryRepository) {
+            FineCategoryRepository categoryRepository) {
 
         this.fineRepository = fineRepository;
         this.categoryRepository = categoryRepository;
@@ -29,7 +29,7 @@ public class FineServiceImpl implements FineService {
     @Override
     public FineResponse createFine(CreateFineRequest request) {
 
-        Category category = categoryRepository
+        FineCategory category = categoryRepository
                 .findByCategoryCode(request.getCategoryCode())
                 .orElseThrow(() ->
                         new RuntimeException("Category not found"));
@@ -44,19 +44,23 @@ public class FineServiceImpl implements FineService {
                                 .toUpperCase());
 
         fine.setCategory(category);
-        fine.setAmount(category.getFineAmount());
+        fine.setAmount(category.getDefaultAmount());
         fine.setStatus("NOT_PAID");
         fine.setOfficerId(request.getOfficerId());
+        fine.setDriverId(request.getDriverId());
         fine.setFineDate(LocalDate.now());
 
         Fine savedFine = fineRepository.save(fine);
 
         return new FineResponse(
                 savedFine.getReferenceNumber(),
-                category.getViolationName(),
+                category.getCategoryCode(),
+                category.getCategoryName(),
                 savedFine.getAmount(),
                 savedFine.getStatus(),
-                savedFine.getFineDate()
+                savedFine.getFineDate(),
+                savedFine.getOfficerId(),
+                savedFine.getDriverId()
         );
     }
 
@@ -70,10 +74,13 @@ public class FineServiceImpl implements FineService {
 
         return new FineResponse(
                 fine.getReferenceNumber(),
-                fine.getCategory().getViolationName(),
+                fine.getCategory().getCategoryCode(),
+                fine.getCategory().getCategoryName(),
                 fine.getAmount(),
                 fine.getStatus(),
-                fine.getFineDate()
+                fine.getFineDate(),
+                fine.getOfficerId(),
+                fine.getDriverId()
         );
     }
 }

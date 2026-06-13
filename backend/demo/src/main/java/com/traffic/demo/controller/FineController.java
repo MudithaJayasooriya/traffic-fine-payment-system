@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/fines")
+@CrossOrigin("*")
 public class FineController {
 
     private final FineService fineService;

@@ -4,6 +4,7 @@ public class CreateFineRequest {
 
     private String categoryCode;
     private Long officerId;
+    private Long driverId;
 
     public String getCategoryCode() {
         return categoryCode;
@@ -19,5 +20,13 @@ public class CreateFineRequest {
 
     public void setOfficerId(Long officerId) {
         this.officerId = officerId;
+    }
+
+    public Long getDriverId() {
+        return driverId;
+    }
+
+    public void setDriverId(Long driverId) {
+        this.driverId = driverId;
     }
 }

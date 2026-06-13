@@ -1,6 +1,7 @@
 package com.traffic.demo.entity;
 
 import jakarta.persistence.*;
+
 import java.time.LocalDate;
 
 @Entity
@@ -11,7 +12,7 @@ public class Fine {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "reference_number", unique = true, nullable = false)
+    @Column(unique = true, nullable = false)
     private String referenceNumber;
 
     @Column(nullable = false)
@@ -20,18 +21,18 @@ public class Fine {
     @Column(nullable = false)
     private String status;
 
-    @Column(name = "officer_id", nullable = false)
+    @Column(nullable = false)
     private Long officerId;
 
-    @Column(name = "fine_date")
+    @Column(nullable = false)
+    private Long driverId;
+
+    @Column(nullable = false)
     private LocalDate fineDate;
 
     @ManyToOne
     @JoinColumn(name = "category_id")
-    private Category category;
-
-    public Fine() {
-    }
+    private FineCategory category;
 
     public Long getId() {
         return id;
@@ -53,11 +54,15 @@ public class Fine {
         return officerId;
     }
 
+    public Long getDriverId() {
+        return driverId;
+    }
+
     public LocalDate getFineDate() {
         return fineDate;
     }
 
-    public Category getCategory() {
+    public FineCategory getCategory() {
         return category;
     }
 
@@ -81,11 +86,15 @@ public class Fine {
         this.officerId = officerId;
     }
 
+    public void setDriverId(Long driverId) {
+        this.driverId = driverId;
+    }
+
     public void setFineDate(LocalDate fineDate) {
         this.fineDate = fineDate;
     }
 
-    public void setCategory(Category category) {
+    public void setCategory(FineCategory category) {
         this.category = category;
     }
 }
