@@ -10,7 +10,7 @@ public class PaymentRequest {
     private Double amount;
     private String currency = "LKR";
 
-    // Customer details (PayHere requirement)
+    // Customer details
     private String firstName;
     private String lastName;
     private String email;
@@ -18,7 +18,7 @@ public class PaymentRequest {
     private String address;
     private String city;
 
-    // Payment method (optional internal tracking)
+    // Payment method
     private String paymentMethod;
 
     public PaymentRequest() {
