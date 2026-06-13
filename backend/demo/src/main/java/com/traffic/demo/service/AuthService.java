@@ -20,6 +20,12 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
+    // Helper method to retrieve user (Used by AuthController for role validation)
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+    }
+
     // Public Route - Strictly for DRIVER role signups
     public AuthResponse register(RegisterRequest request) {
         if (request.getRole() == Role.OFFICER) {
@@ -35,7 +41,6 @@ public class AuthService {
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(Role.DRIVER);
-        // Map new fields
         user.setNicNumber(request.getNicNumber());
         user.setPhoneNumber(request.getPhoneNumber());
 
@@ -50,7 +55,7 @@ public class AuthService {
         String inputUsername = request.getUsername();
 
         if (inputUsername == null || !inputUsername.contains("_")) {
-            throw new IllegalArgumentException("Invalid username format. Officer username must include both name and badge number separated by an underscore (e.g., 'perera_B8831').");
+            throw new IllegalArgumentException("Invalid username format. Officer username must include both name and badge number separated by an underscore.");
         }
 
         if (userRepository.findByUsername(inputUsername).isPresent()) {
@@ -62,7 +67,6 @@ public class AuthService {
         officer.setEmail(request.getEmail());
         officer.setPassword(passwordEncoder.encode(request.getPassword()));
         officer.setRole(Role.OFFICER);
-        // Map new fields
         officer.setNicNumber(request.getNicNumber());
         officer.setPhoneNumber(request.getPhoneNumber());
 
@@ -78,9 +82,7 @@ public class AuthService {
                 )
         );
 
-        User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + request.getUsername()));
-
+        User user = getUserByUsername(request.getUsername());
         String token = jwtService.generateToken(user);
         return new AuthResponse(token);
     }
