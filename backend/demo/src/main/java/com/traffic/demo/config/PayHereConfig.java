@@ -1,10 +1,25 @@
 package com.traffic.demo.config;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+@Component
 public class PayHereConfig {
 
-    public static final String MERCHANT_ID = "1235501";
-    public static final String MERCHANT_SECRET = "MjY3ODU3NTA0OTI1ODUwMTQ2NDAyNzkzMTU1MDAzMzA0MzMxNDU0MQ==";
+    @Value("${PAYHERE_MERCHANT_ID}")
+    private String merchantId;
+
+    @Value("${PAYHERE_MERCHANT_SECRET}")
+    private String merchantSecret;
 
     public static final String PAYHERE_SANDBOX_URL =
             "https://sandbox.payhere.lk/pay/checkout";
+
+    public String getMerchantId() {
+        return merchantId;
+    }
+
+    public String getMerchantSecret() {
+        return merchantSecret;
+    }
 }
