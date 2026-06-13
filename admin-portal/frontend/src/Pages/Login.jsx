@@ -27,7 +27,6 @@ function Login() {
       formData.password === "12345"
     ) {
       localStorage.setItem("adminLoggedIn", "true");
-
       navigate("/dashboard");
     } else {
       setError("Invalid Username or Password");
@@ -35,90 +34,84 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4"
+      style={{ background: "radial-gradient(ellipse at center, #0f2744 0%, #0a1628 100%)" }}>
 
-      <div className="bg-white w-full max-w-md rounded-2xl shadow-lg p-8">
+      <div className="w-full max-w-md rounded-2xl p-8"
+        style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", backdropFilter: "blur(10px)" }}>
 
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="bg-blue-600 p-4 rounded-full">
-              <FaUserShield className="text-white text-3xl" />
+        {/* Icon */}
+        <div className="text-center mb-6">
+          <div className="flex justify-center mb-5">
+            <div className="p-4 rounded-2xl"
+              style={{ backgroundColor: "#1a3a5c" }}>
+              <FaUserShield className="text-blue-400 text-3xl" />
             </div>
           </div>
 
-          <h1 className="text-3xl font-bold text-slate-800">
+          <p className="text-xs font-semibold tracking-widest mb-1"
+            style={{ color: "#f0a500" }}>
+            WELCOME BACK
+          </p>
+
+          <h1 className="text-3xl font-bold text-white mb-2">
             Admin Portal
           </h1>
 
-          <p className="text-gray-500 mt-2">
+          <p className="text-sm" style={{ color: "#8baabf" }}>
             Traffic Fine Payment System
           </p>
         </div>
 
+        {/* Error */}
         {error && (
-          <div className="bg-red-100 text-red-600 p-3 rounded-lg mb-4">
+          <div className="text-red-400 text-sm text-center p-3 rounded-lg mb-4"
+            style={{ backgroundColor: "rgba(255,80,80,0.1)", border: "1px solid rgba(255,80,80,0.2)" }}>
             {error}
           </div>
         )}
 
-        <form
-          onSubmit={handleLogin}
-          className="space-y-5"
-        >
+        {/* Form */}
+        <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block mb-2 text-sm font-medium">
-              Username
-            </label>
-
-            <div className="flex items-center border rounded-lg px-3">
-              <FaUserShield className="text-gray-400" />
-
-              <input
-                type="text"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                placeholder="Enter Username"
-                className="w-full p-3 outline-none"
-                required
-              />
-            </div>
+            <input
+              type="text"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              placeholder="Username"
+              className="w-full px-4 py-3 rounded-xl text-white outline-none placeholder-gray-400"
+              style={{ backgroundColor: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)" }}
+              required
+            />
           </div>
 
           <div>
-            <label className="block mb-2 text-sm font-medium">
-              Password
-            </label>
-
-            <div className="flex items-center border rounded-lg px-3">
-              <FaLock className="text-gray-400" />
-
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Enter Password"
-                className="w-full p-3 outline-none"
-                required
-              />
-            </div>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Password"
+              className="w-full px-4 py-3 rounded-xl text-white outline-none placeholder-gray-400"
+              style={{ backgroundColor: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)" }}
+              required
+            />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition"
-          >
-            Login
+            className="w-full py-3 rounded-xl font-semibold text-white transition-all duration-200 hover:brightness-110 flex items-center justify-center gap-2"
+            style={{ backgroundColor: "#3b82f6" }}>
+            Login →
           </button>
         </form>
 
-        <div className="mt-6 text-center text-sm text-gray-500">
-          Demo Login
-          <br />
-          Username: <strong>admin123</strong>
-          <br />
-          Password: <strong>12345</strong>
+        {/* Footer */}
+        <div className="mt-6 text-center text-xs" style={{ color: "#8baabf" }}>
+          Use the same portal account you received from the traffic office.
+          <br /><br />
+          Demo: <strong className="text-white">admin123</strong> / <strong className="text-white">12345</strong>
         </div>
 
       </div>
