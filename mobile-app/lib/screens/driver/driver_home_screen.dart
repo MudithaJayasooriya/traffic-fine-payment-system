@@ -18,12 +18,12 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
   }
 
   Future<void> _loadUser() async {
-    final name = await AuthService.getName();
+    final name = await ApiService.getName();
     setState(() => _userName = name);
   }
 
   Future<void> _handleLogout() async {
-    await AuthService.logout();
+    await ApiService.logout();
     if (!mounted) return;
     Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
   }

@@ -11,8 +11,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Check existing session on app launch
-  final isLoggedIn = await AuthService.isLoggedIn();
-  final role = isLoggedIn ? await AuthService.getRole() : null;
+  final isLoggedIn = await ApiService.isLoggedIn();
+  final role = isLoggedIn ? await ApiService.getRole() : null;
 
   runApp(MyApp(initialRoute: _resolveInitialRoute(role)));
 }
