@@ -121,7 +121,7 @@ class _SearchFineScreenState extends State<SearchFineScreen> {
           Padding(
             padding: const EdgeInsets.all(20),
             child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
