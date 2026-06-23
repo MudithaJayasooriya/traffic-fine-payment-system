@@ -9,7 +9,8 @@ class FineService {
   Future<Fine?> createFine(
       String categoryCode,
       int officerId,
-      int driverId) async {
+      int driverId,
+      ) async {
 
     final response = await http.post(
       Uri.parse("$baseUrl/fines"),
@@ -17,11 +18,11 @@ class FineService {
       body: jsonEncode({
         "categoryCode": categoryCode,
         "officerId": officerId,
-        "driverId": driverId
+        "driverId": driverId,
       }),
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 || response.statusCode == 201) {
       return Fine.fromJson(jsonDecode(response.body));
     }
 
@@ -39,5 +40,23 @@ class FineService {
     }
 
     return null;
+  }
+
+  Future<List<Fine>> getDriverFines(int driverId) async {
+
+    final response = await http.get(
+      Uri.parse("$baseUrl/fines/driver/$driverId"),
+    );
+
+    if (response.statusCode == 200) {
+
+      List<dynamic> data = jsonDecode(response.body);
+
+      return data
+          .map((fine) => Fine.fromJson(fine))
+          .toList();
+    }
+
+    return [];
   }
 }
