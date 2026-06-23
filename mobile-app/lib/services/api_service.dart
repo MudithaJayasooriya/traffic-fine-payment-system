@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import '../core/constants.dart';
 
-class AuthService {
+class ApiService {
   static const _tokenKey = 'jwt_token';
   static const _roleKey = 'user_role';
   static const _nameKey = 'user_name';

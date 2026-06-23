@@ -33,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _errorMessage = null;
     });
 
-    final result = await AuthService.login(
+    final result = await ApiService.login(
       _usernameCtrl.text.trim(),
       _passwordCtrl.text,
     );
