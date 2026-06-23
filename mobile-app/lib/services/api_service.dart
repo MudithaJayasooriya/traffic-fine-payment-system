@@ -91,9 +91,6 @@ class ApiService {
       body: jsonEncode({'username': username, 'password': password}),
     );
 
-    print('LOGIN STATUS: ${response.statusCode}');
-    print('LOGIN BODY: ${response.body}');
-
     if (response.statusCode == 200) {
       final body = jsonDecode(response.body);
       final token = body['token'] ?? '';
@@ -131,9 +128,6 @@ class ApiService {
       }),
     );
 
-    print('REGISTER STATUS: ${response.statusCode}');
-    print('REGISTER BODY: ${response.body}');
-
     if (response.statusCode == 200 || response.statusCode == 201) {
       final body = jsonDecode(response.body);
       final token = body['token'] ?? '';
@@ -150,23 +144,5 @@ class ApiService {
         'message': _extractErrorMessage(response),
       };
     }
-
-class ApiService {
-
-  static const String baseUrl = "http://10.0.2.2:8080/api";
-
-  static Future<http.Response> post(
-      String endpoint,
-      Map<String, dynamic> data,
-      ) async {
-    return await http.post(
-      Uri.parse(baseUrl + endpoint),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode(data),
-    );
-  }
-
-  static Future<http.Response> get(String endpoint) async {
-    return await http.get(Uri.parse(baseUrl + endpoint));
   }
 }

@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'services/api_service.dart';
-import 'screens/auth/login.dart'; // Ensure imports match your file paths
+import 'screens/auth/login.dart';
 import 'screens/auth/register.dart';
-import 'screens/landing_screen.dart'; // Your new landing page
+import 'screens/landing_screen.dart';
 import 'screens/driver/driver_home_screen.dart';
 import 'screens/officer/officer_home_screen.dart';
 import 'core/constants.dart';
-import 'screens/officer/officer_dashboard.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,12 +20,14 @@ void main() async {
 String _resolveInitialRoute(String? role) {
   if (role == AppConstants.roleDriver) return '/driver-home';
   if (role == AppConstants.roleOfficer) return '/officer-home';
+
   // If not logged in, go to Landing instead of Login directly
   return '/';
 }
 
 class MyApp extends StatelessWidget {
   final String initialRoute;
+
   const MyApp({super.key, required this.initialRoute});
 
   @override
@@ -52,8 +53,13 @@ class MyApp extends StatelessWidget {
           ),
         ),
         inputDecorationTheme: InputDecorationTheme(
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
         ),
       ),
       initialRoute: initialRoute,
@@ -64,15 +70,6 @@ class MyApp extends StatelessWidget {
         '/driver-home': (_) => const DriverHomeScreen(),
         '/officer-home': (_) => const OfficerHomeScreen(),
       },
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Traffic Fine System',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const OfficerDashboard(),
     );
   }
 }
