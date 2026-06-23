@@ -6,6 +6,7 @@ import 'screens/landing_screen.dart'; // Your new landing page
 import 'screens/driver/driver_home_screen.dart';
 import 'screens/officer/officer_home_screen.dart';
 import 'core/constants.dart';
+import 'screens/officer/officer_dashboard.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -63,6 +64,15 @@ class MyApp extends StatelessWidget {
         '/driver-home': (_) => const DriverHomeScreen(),
         '/officer-home': (_) => const OfficerHomeScreen(),
       },
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Traffic Fine System',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      ),
+      home: const OfficerDashboard(),
     );
   }
 }
