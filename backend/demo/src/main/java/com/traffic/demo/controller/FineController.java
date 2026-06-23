@@ -1,4 +1,5 @@
 package com.traffic.demo.controller;
+import java.util.List;
 
 import com.traffic.demo.dto.CreateFineRequest;
 import com.traffic.demo.dto.FineResponse;
@@ -28,5 +29,10 @@ public class FineController {
             @PathVariable String referenceNumber) {
 
         return fineService.getFineByReferenceNumber(referenceNumber);
+    }
+
+    @GetMapping("/driver/{driverId}")
+    public List<FineResponse> getFinesByDriver(@PathVariable Long driverId) {
+        return fineService.getFinesByDriver(driverId);
     }
 }
