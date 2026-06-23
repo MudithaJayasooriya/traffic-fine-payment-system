@@ -1,5 +1,7 @@
 package com.traffic.demo.service;
 
+import java.util.List;
+
 import com.traffic.demo.dto.CreateFineRequest;
 import com.traffic.demo.dto.FineResponse;
 import com.traffic.demo.entity.Fine;
@@ -82,5 +84,24 @@ public class FineServiceImpl implements FineService {
                 fine.getOfficerId(),
                 fine.getDriverId()
         );
+    }
+
+    @Override
+    public List<FineResponse> getFinesByDriver(Long driverId) {
+
+        List<Fine> fines = fineRepository.findByDriverId(driverId);
+
+        return fines.stream().map(fine ->
+                new FineResponse(
+                        fine.getReferenceNumber(),
+                        fine.getCategory().getCategoryCode(),
+                        fine.getCategory().getCategoryName(),
+                        fine.getAmount(),
+                        fine.getStatus(),
+                        fine.getFineDate(),
+                        fine.getOfficerId(),
+                        fine.getDriverId()
+                )
+        ).toList();
     }
 }
