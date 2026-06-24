@@ -1,6 +1,7 @@
 class AppConstants {
   static const String roleDriver = 'DRIVER';
   static const String roleOfficer = 'OFFICER';
+  static const String roleAdmin = 'ADMIN';
 
 
   // API config
