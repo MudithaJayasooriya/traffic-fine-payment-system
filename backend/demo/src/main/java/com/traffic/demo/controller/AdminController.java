@@ -7,6 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import com.traffic.demo.entity.Role;
+import com.traffic.demo.entity.User;
+import java.util.List;
+import java.util.ArrayList;
+
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
@@ -19,5 +24,6 @@ public class AdminController {
     public ResponseEntity<String> registerOfficer(@RequestBody RegisterRequest request) {
         return ResponseEntity.ok(authService.registerOfficerByAdmin(request));
     }
+
 }
 
