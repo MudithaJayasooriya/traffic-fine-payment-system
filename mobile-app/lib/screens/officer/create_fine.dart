@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 import '../../services/fine_service.dart';
+// Import your dashboard screen here
+import 'officer_dashboard.dart';
 
 class CreateFineScreen extends StatefulWidget {
   const CreateFineScreen({super.key});
@@ -9,136 +12,425 @@ class CreateFineScreen extends StatefulWidget {
 }
 
 class _CreateFineScreenState extends State<CreateFineScreen> {
-  final categoryController = TextEditingController();
-  final officerController = TextEditingController();
-  final driverController = TextEditingController();
   final FineService service = FineService();
+
+  // DATA
+  List<dynamic> categories = [];
+  List<dynamic> drivers = [];
+
+  // SELECTED
+  Map<String, dynamic>? selectedCategoryObj;
+  Map<String, dynamic>? selectedDriverObj;
+  Map<String, dynamic>? selectedOfficerObj;
+
+  String? selectedCategory;
+  String? selectedDriver;
+
+  // Officer ID input
+  final TextEditingController officerIdController = TextEditingController();
 
   String result = "";
   bool isSuccess = false;
 
+  // UI State Tracking
+  bool isCreated = false;
+  String referenceNumber = "";
+
+  @override
+  void initState() {
+    super.initState();
+    loadInitialData();
+  }
+
+  // LOAD DATA
+  void loadInitialData() async {
+    final c = await service.getAllCategories();
+    final d = await service.getAllDrivers();
+
+    setState(() {
+      categories = c;
+      drivers = d;
+    });
+  }
+
+  // OFFICER AUTO FETCH
+  void fetchOfficerById(String id) async {
+    if (id.isEmpty) return;
+
+    final officer = await service.getUserById(int.parse(id));
+
+    setState(() {
+      selectedOfficerObj = officer;
+    });
+  }
+
+  // CREATE FINE
   void createFine() async {
-    if (categoryController.text.isEmpty || officerController.text.isEmpty || driverController.text.isEmpty) {
+    if (selectedCategory == null ||
+        officerIdController.text.isEmpty ||
+        selectedDriver == null) {
       setState(() {
-        result = "Please fill in all fields";
+        result = "Please fill all fields";
         isSuccess = false;
       });
       return;
     }
 
-    // Dynamic UI trick: unfocus keyboard
-    FocusScope.of(context).unfocus();
-
     final fine = await service.createFine(
-      categoryController.text,
-      int.parse(officerController.text),
-      int.parse(driverController.text),
+      selectedCategory!,
+      int.parse(officerIdController.text),
+      int.parse(selectedDriver!),
     );
 
     setState(() {
       if (fine != null) {
-        result = "Fine Created Successfully!\nRef: ${fine.referenceNumber}";
+        result = "Fine Created Successfully";
+        referenceNumber = fine.referenceNumber ?? "N/A";
         isSuccess = true;
+        isCreated = true; // Flips UI to the Success View
       } else {
-        result = "Failed to create fine. Please try again.";
+        result = "Failed to create fine";
         isSuccess = false;
+        isCreated = false;
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+
+    // SUCCESS VIEW (Shows only after fine is successfully created)
+    if (isCreated) {
+      return Scaffold(
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Animated-like Checkmark Ring
+                  Container(
+                    height: 100,
+                    width: 100,
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade50,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.green.shade200, width: 4),
+                    ),
+                    child: Icon(Icons.check_circle_rounded, size: 64, color: Colors.green.shade600),
+                  ),
+                  const SizedBox(height: 24),
+
+                  Text(
+                    "Ticket Issued Successfully!",
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green.shade800,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "The fine has been registered into the traffic system.",
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // Big prominent Reference Number Card
+                  Card(
+                    color: theme.colorScheme.primaryContainer.withOpacity(0.4),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(color: theme.colorScheme.primary.withOpacity(0.2)),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                      child: Column(
+                        children: [
+                          Text(
+                            "REFERENCE NUMBER",
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              letterSpacing: 1.5,
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            referenceNumber,
+                            style: theme.textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.onPrimaryContainer,
+                              letterSpacing: 1.0,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Complete Breakdown Table / Details
+                  Text(
+                    "Ticket Details Summary",
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 12),
+                  Card(
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(color: theme.colorScheme.outlineVariant),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          _summaryRow("Category", "${selectedCategoryObj?['categoryCode']} - ${selectedCategoryObj?['categoryName']}"),
+                          const Divider(height: 20),
+                          _summaryRow("Fine Amount", "\$${selectedCategoryObj?['defaultAmount']}"),
+                          const Divider(height: 20),
+                          _summaryRow("Officer", "ID ${selectedOfficerObj?['id']} (${selectedOfficerObj?['username']})"),
+                          const Divider(height: 20),
+                          _summaryRow("Driver", "${selectedDriverObj?['username']} (ID: ${selectedDriverObj?['id']})"),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 40),
+
+                  // Redirect OK button
+                  FilledButton(
+                    onPressed: () {
+                      // Navigate directly to dashboard and remove previous setup from stack
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => const OfficerDashboard()),
+                            (route) => false,
+                      );
+                    },
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: const Text("OK - Return to Dashboard", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // STANDARD FORM VIEW (Default initial view state)
+
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
+        title: const Text("Create Fine Ticket"),
+        centerTitle: true,
         elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        title: const Text("New Citation", style: TextStyle(fontWeight: FontWeight.bold)),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              "Enter Offense Details",
-              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-            ),
-            const SizedBox(height: 24),
-
-            _buildInputField(
-              controller: categoryController,
-              label: "Category Code",
-              icon: Icons.gavel_rounded,
-              hint: "e.g., SPEED_01",
-            ),
-            const SizedBox(height: 20),
-
-            _buildInputField(
-              controller: officerController,
-              label: "Officer ID",
-              icon: Icons.badge_rounded,
-              hint: "Enter your numerical ID",
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 20),
-
-            _buildInputField(
-              controller: driverController,
-              label: "Driver ID",
-              icon: Icons.assignment_ind_rounded,
-              hint: "Enter motorist license ID",
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 32),
-
-            // Submit Button
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: createFine,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1E3A8A),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 2,
-                ),
-                child: const Text(
-                  "Issue Ticket",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            //  CATEGORY
+            Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(color: theme.colorScheme.outlineVariant),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Violation Category",
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownSearch<Map<String, dynamic>>(
+                      items: categories.cast<Map<String, dynamic>>(),
+                      itemAsString: (i) =>
+                      "${i['categoryCode']} - ${i['categoryName']}",
+                      popupProps: const PopupProps.menu(showSearchBox: true),
+                      onChanged: (item) {
+                        setState(() {
+                          selectedCategoryObj = item;
+                          selectedCategory = item?['categoryCode'];
+                        });
+                      },
+                      dropdownDecoratorProps: const DropDownDecoratorProps(
+                        dropdownSearchDecoration: InputDecoration(
+                          prefixIcon: Icon(Icons.assignment_outlined),
+                          labelText: "Select Category",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(12)),
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (selectedCategoryObj != null)
+                      _box(context, [
+                        "Code: ${selectedCategoryObj!['categoryCode']}",
+                        "Name: ${selectedCategoryObj!['categoryName']}",
+                        "Description: ${selectedCategoryObj!['description']}",
+                        "Amount: \$${selectedCategoryObj!['defaultAmount']}",
+                      ]),
+                  ],
                 ),
               ),
             ),
-            const SizedBox(height: 24),
 
-            // Result Alert Box
-            if (result.isNotEmpty)
+            const SizedBox(height: 16),
+
+            // OFFICER
+            Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(color: theme.colorScheme.outlineVariant),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Issuing Officer",
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: officerIdController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        prefixIcon: Icon(Icons.badge_outlined),
+                        labelText: "Officer ID",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(12)),
+                        ),
+                      ),
+                      onChanged: fetchOfficerById,
+                    ),
+                    if (selectedOfficerObj != null)
+                      _box(context, [
+                        "ID: ${selectedOfficerObj!['id']}",
+                        "Username: ${selectedOfficerObj!['username']}",
+                        "Email: ${selectedOfficerObj!['email']}",
+                      ]),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // DRIVER
+            Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(color: theme.colorScheme.outlineVariant),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Offending Driver",
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownSearch<Map<String, dynamic>>(
+                      items: drivers.cast<Map<String, dynamic>>(),
+                      itemAsString: (i) => "${i['id']} - ${i['username']}",
+                      popupProps: const PopupProps.menu(showSearchBox: true),
+                      onChanged: (item) {
+                        setState(() {
+                          selectedDriverObj = item;
+                          selectedDriver = item?['id'].toString();
+                        });
+                      },
+                      dropdownDecoratorProps: const DropDownDecoratorProps(
+                        dropdownSearchDecoration: InputDecoration(
+                          prefixIcon: Icon(Icons.person_outline),
+                          labelText: "Select Driver",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(12)),
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (selectedDriverObj != null)
+                      _box(context, [
+                        "ID: ${selectedDriverObj!['id']}",
+                        "Username: ${selectedDriverObj!['username']}",
+                        "Phone: ${selectedDriverObj!['phoneNumber']}",
+                      ]),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 32),
+
+            // ISSUE BUTTON
+            FilledButton.icon(
+              onPressed: createFine,
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              icon: const Icon(Icons.gavel),
+              label: const Text(
+                "Issue Ticket",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Error Message (Only shows if creation fails)
+            if (result.isNotEmpty && !isSuccess)
               Container(
-                width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: isSuccess ? Colors.green[50] : Colors.red[50],
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: isSuccess ? Colors.green[200]! : Colors.red[200]!,
-                  ),
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.red.shade300),
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      isSuccess ? Icons.check_circle_rounded : Icons.error_rounded,
-                      color: isSuccess ? Colors.green[700] : Colors.red[700],
-                    ),
+                    Icon(Icons.error, color: Colors.red.shade700),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         result,
-                        style: TextStyle(
-                          color: isSuccess ? Colors.green[900] : Colors.red[900],
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: TextStyle(color: Colors.red.shade900, fontWeight: FontWeight.w600),
                       ),
                     ),
                   ],
@@ -150,38 +442,51 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
     );
   }
 
-  Widget _buildInputField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    required String hint,
-    TextInputType keyboardType = TextInputType.text,
-  }) {
-    return Column(
+  // BOX UI HELPERS
+  Widget _box(BuildContext context, List<String> items) {
+    final theme = Theme.of(context);
+    return Container(
+      margin: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.all(12),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: items.map((e) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2),
+            child: Text(
+              e,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onPrimaryContainer,
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _summaryRow(String label, String value) {
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+        Expanded(
+          flex: 2,
+          child: Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.grey),
+          ),
         ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          keyboardType: keyboardType,
-          decoration: InputDecoration(
-            hintText: hint,
-            prefixIcon: Icon(icon, color: Colors.grey[400], size: 22),
-            filled: true,
-            fillColor: Colors.grey[50],
-            contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: Colors.grey[200]!),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: Color(0xFF3B82F6), width: 2),
-            ),
+        Expanded(
+          flex: 3,
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
       ],

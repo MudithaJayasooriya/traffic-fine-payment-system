@@ -99,7 +99,7 @@ class FineService {
   }
   Future<List<dynamic>> getAllDrivers() async {
     final response = await http.get(
-      Uri.parse("$baseUrl/users/drivers"),
+        Uri.parse("$baseUrl/users/drivers"),
     );
 
     if (response.statusCode == 200) {
