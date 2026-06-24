@@ -9,7 +9,7 @@ class ApiService {
   static const _roleKey = 'user_role';
   static const _nameKey = 'user_name';
 
-  // ─── Token Storage ───────────────────────────────────────────────────────
+  // Token Storage
 
   static Future<void> saveSession(String token, String role, String name) async {
     final prefs = await SharedPreferences.getInstance();
@@ -47,10 +47,9 @@ class ApiService {
     await prefs.remove(_nameKey);
   }
 
-  // ─── Helpers ──────────────────────────────────────────────────────────────
+  //Helpers
 
-  /// Safely extracts an error message whether the backend returned
-  /// JSON (e.g. {"message": "..."}) or plain text (e.g. "Username taken").
+
   static String _extractErrorMessage(http.Response response) {
     try {
       final body = jsonDecode(response.body);
@@ -64,8 +63,7 @@ class ApiService {
     }
   }
 
-  /// Extracts role and username from inside the JWT payload, since the
-  /// backend's login/register response only returns {"token": "..."}.
+
   static Map<String, String> _extractRoleAndNameFromToken(
       String token, String fallbackUsername) {
     try {
@@ -73,7 +71,7 @@ class ApiService {
       final roles = decodedToken['roles'] as List<dynamic>?;
       final rawRole =
       (roles != null && roles.isNotEmpty) ? roles[0].toString() : '';
-      final role = rawRole.replaceFirst('ROLE_', ''); // "ROLE_DRIVER" -> "DRIVER"
+      final role = rawRole.replaceFirst('ROLE_', '');
       final username = decodedToken['sub']?.toString() ?? fallbackUsername;
       return {'role': role, 'username': username};
     } catch (_) {
@@ -82,7 +80,7 @@ class ApiService {
     }
   }
 
-  // ─── API Calls ────────────────────────────────────────────────────────────
+  // API Calls
 
   static Future<Map<String, dynamic>> login(String username, String password) async {
     final response = await http.post(
@@ -90,6 +88,9 @@ class ApiService {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'username': username, 'password': password}),
     );
+
+    print("STATUS CODE: ${response.statusCode}");
+    print("BODY: ${response.body}");
 
     if (response.statusCode == 200) {
       final body = jsonDecode(response.body);
