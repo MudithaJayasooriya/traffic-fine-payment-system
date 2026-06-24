@@ -6,6 +6,7 @@ import 'screens/landing_screen.dart';
 import 'screens/driver/driver_home_screen.dart';
 import 'screens/officer/officer_home_screen.dart';
 import 'screens/officer/reset_password_screen.dart';
+import 'screens/officer/officer_dashboard.dart';
 import 'core/constants.dart';
 
 void main() async {
@@ -76,6 +77,7 @@ class MyApp extends StatelessWidget {
         '/driver-home': (_) => const DriverHomeScreen(),
         '/officer-home': (_) => const OfficerHomeScreen(),
         '/reset-password': (_) => const ResetPasswordScreen(),
+        '/officer-home': (_) => const OfficerDashboard(),
       },
     );
   }

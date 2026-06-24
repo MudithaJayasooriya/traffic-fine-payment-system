@@ -10,7 +10,7 @@ class ApiService {
   static const _nameKey = 'user_name';
   static const _mustChangePasswordKey = 'must_change_password';
 
-  // ─── Token Storage ───────────────────────────────────────────────────────
+  // Token Storage
 
   static Future<void> saveSession(
       String token, String role, String name, bool mustChangePassword) async {
@@ -56,7 +56,8 @@ class ApiService {
     await prefs.remove(_mustChangePasswordKey);
   }
 
-  // ─── Helpers ──────────────────────────────────────────────────────────────
+  //Helpers
+
 
   /// Safely extracts an error message whether the backend returned
   /// JSON (e.g. {"message": "..."}) or plain text.
@@ -90,6 +91,8 @@ class ApiService {
   /// the JWT payload, since the backend's login/register response only
   /// returns {"token": "..."}.
   static Map<String, dynamic> _extractClaimsFromToken(
+
+  static Map<String, String> _extractRoleAndNameFromToken(
       String token, String fallbackUsername) {
     try {
       final decodedToken = JwtDecoder.decode(token);
@@ -113,7 +116,7 @@ class ApiService {
     }
   }
 
-  // ─── API Calls ────────────────────────────────────────────────────────────
+  // API Calls
 
   static Future<Map<String, dynamic>> login(String username, String password) async {
     final response = await http.post(
@@ -121,6 +124,9 @@ class ApiService {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'username': username, 'password': password}),
     );
+
+    print("STATUS CODE: ${response.statusCode}");
+    print("BODY: ${response.body}");
 
     if (response.statusCode == 200) {
       final body = jsonDecode(response.body);
