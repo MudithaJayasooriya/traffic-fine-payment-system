@@ -10,6 +10,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -43,7 +45,6 @@ public class AuthService {
         user.setRole(Role.DRIVER);
         user.setNicNumber(request.getNicNumber());
         user.setPhoneNumber(request.getPhoneNumber());
-        // mustChangePassword NOT set here — defaults to false for drivers
 
         userRepository.save(user);
 
@@ -70,7 +71,6 @@ public class AuthService {
         officer.setRole(Role.OFFICER);
         officer.setNicNumber(request.getNicNumber());
         officer.setPhoneNumber(request.getPhoneNumber());
-        officer.setMustChangePassword(true); // forces password reset on first login
 
         userRepository.save(officer);
         return "Traffic Officer registered successfully with username: " + inputUsername;
@@ -116,5 +116,10 @@ public class AuthService {
         user.setMustChangePassword(true); // forces them to change it again on next login
         userRepository.save(user);
         return "Password reset successfully for officer: " + username;
+    }
+
+// GET USERS BY ROLE
+    public List<User> getUsersByRole(Role role) {
+        return userRepository.findByRole(role);
     }
 }

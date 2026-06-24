@@ -19,11 +19,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 import java.util.List;
+import org.springframework.http.HttpMethod;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -39,11 +42,24 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
+
+                        // login endpoints
                         // Public endpoints
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/api/users/**").permitAll()
+                        .requestMatchers("/api/categories").permitAll()
+                        .requestMatchers("/api/categories/search").permitAll()
+
+                        // normal logged-in users
+                        .requestMatchers("/api/categories", "/api/categories/{id}").permitAll()
+
+                        // admin only (keep wildcard AFTER exclusions)
+                        .requestMatchers("/api/categories/**").hasRole("ADMIN")
 
                         // Admin only
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/fines").hasRole("OFFICER")
+                        .requestMatchers("/api/fines/**").authenticated()
 
                         // Everything else requires auth
                         .anyRequest().authenticated()

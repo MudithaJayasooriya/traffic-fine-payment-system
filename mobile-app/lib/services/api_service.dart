@@ -10,7 +10,7 @@ class ApiService {
   static const _nameKey = 'user_name';
   static const _mustChangePasswordKey = 'must_change_password';
 
-  // ─── Token Storage ───────────────────────────────────────────────────────
+  // Token Storage
 
   static Future<void> saveSession(
       String token, String role, String name, bool mustChangePassword) async {
@@ -44,7 +44,6 @@ class ApiService {
   static Future<bool> isLoggedIn() async {
     final token = await getToken();
     if (token == null) return false;
-    // Check token not expired
     return !JwtDecoder.isExpired(token);
   }
 
@@ -56,10 +55,8 @@ class ApiService {
     await prefs.remove(_mustChangePasswordKey);
   }
 
-  // ─── Helpers ──────────────────────────────────────────────────────────────
+  // Helpers
 
-  /// Safely extracts an error message whether the backend returned
-  /// JSON (e.g. {"message": "..."}) or plain text.
   static String _extractErrorMessage(http.Response response) {
     try {
       final body = jsonDecode(response.body);
@@ -72,8 +69,6 @@ class ApiService {
     }
   }
 
-  /// Safely extracts a success message whether the backend returned
-  /// JSON (e.g. {"message": "..."}) or plain text.
   static String _extractSuccessMessage(http.Response response) {
     try {
       final body = jsonDecode(response.body);
@@ -86,9 +81,8 @@ class ApiService {
     }
   }
 
-  /// Extracts role, username, and the mustChangePassword flag from inside
-  /// the JWT payload, since the backend's login/register response only
-  /// returns {"token": "..."}.
+  // Renamed from _extractRoleAndNameFromToken → _extractClaimsFromToken
+  // Return type widened to Map<String, dynamic> to accommodate the bool value
   static Map<String, dynamic> _extractClaimsFromToken(
       String token, String fallbackUsername) {
     try {
@@ -113,23 +107,27 @@ class ApiService {
     }
   }
 
-  // ─── API Calls ────────────────────────────────────────────────────────────
+  // API Calls
 
-  static Future<Map<String, dynamic>> login(String username, String password) async {
+  static Future<Map<String, dynamic>> login(
+      String username, String password) async {
     final response = await http.post(
       Uri.parse('${AppConstants.baseUrl}${AppConstants.loginEndpoint}'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'username': username, 'password': password}),
     );
 
+    print("STATUS CODE: ${response.statusCode}");
+    print("BODY: ${response.body}");
+
     if (response.statusCode == 200) {
       final body = jsonDecode(response.body);
       final token = body['token'] ?? '';
 
-      print('RAW TOKEN PAYLOAD: ${JwtDecoder.decode(token)}'); // DEBUG
+      print('RAW TOKEN PAYLOAD: ${JwtDecoder.decode(token)}');
 
       final claims = _extractClaimsFromToken(token, username);
-      print('DECODED CLAIMS: $claims'); // DEBUG
+      print('DECODED CLAIMS: $claims');
 
       final role = claims['role'] as String;
       final resolvedUsername = claims['username'] as String;
