@@ -5,6 +5,8 @@ import 'screens/auth/register.dart';
 import 'screens/landing_screen.dart';
 import 'screens/driver/driver_home_screen.dart';
 import 'screens/officer/officer_home_screen.dart';
+import 'screens/officer/reset_password_screen.dart';
+import 'screens/officer/officer_dashboard.dart';
 import 'core/constants.dart';
 
 void main() async {
@@ -13,11 +15,16 @@ void main() async {
   // Check existing session on app launch
   final isLoggedIn = await ApiService.isLoggedIn();
   final role = isLoggedIn ? await ApiService.getRole() : null;
+  final mustChangePassword =
+  isLoggedIn ? await ApiService.getMustChangePassword() : false;
 
-  runApp(MyApp(initialRoute: _resolveInitialRoute(role)));
+  runApp(MyApp(initialRoute: _resolveInitialRoute(role, mustChangePassword)));
 }
 
-String _resolveInitialRoute(String? role) {
+String _resolveInitialRoute(String? role, bool mustChangePassword) {
+  if (role == AppConstants.roleOfficer && mustChangePassword) {
+    return '/reset-password';
+  }
   if (role == AppConstants.roleDriver) return '/driver-home';
   if (role == AppConstants.roleOfficer) return '/officer-home';
 
@@ -69,6 +76,8 @@ class MyApp extends StatelessWidget {
         '/register': (_) => const RegisterScreen(),
         '/driver-home': (_) => const DriverHomeScreen(),
         '/officer-home': (_) => const OfficerHomeScreen(),
+        '/reset-password': (_) => const ResetPasswordScreen(),
+        '/officer-home': (_) => const OfficerDashboard(),
       },
     );
   }

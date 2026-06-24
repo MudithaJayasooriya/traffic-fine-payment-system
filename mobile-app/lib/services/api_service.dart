@@ -8,14 +8,17 @@ class ApiService {
   static const _tokenKey = 'jwt_token';
   static const _roleKey = 'user_role';
   static const _nameKey = 'user_name';
+  static const _mustChangePasswordKey = 'must_change_password';
 
-  // ─── Token Storage ───────────────────────────────────────────────────────
+  // Token Storage
 
-  static Future<void> saveSession(String token, String role, String name) async {
+  static Future<void> saveSession(
+      String token, String role, String name, bool mustChangePassword) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_tokenKey, token);
     await prefs.setString(_roleKey, role);
     await prefs.setString(_nameKey, name);
+    await prefs.setBool(_mustChangePasswordKey, mustChangePassword);
   }
 
   static Future<String?> getToken() async {
@@ -33,6 +36,11 @@ class ApiService {
     return prefs.getString(_nameKey);
   }
 
+  static Future<bool> getMustChangePassword() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_mustChangePasswordKey) ?? false;
+  }
+
   static Future<bool> isLoggedIn() async {
     final token = await getToken();
     if (token == null) return false;
@@ -45,12 +53,14 @@ class ApiService {
     await prefs.remove(_tokenKey);
     await prefs.remove(_roleKey);
     await prefs.remove(_nameKey);
+    await prefs.remove(_mustChangePasswordKey);
   }
 
-  // ─── Helpers ──────────────────────────────────────────────────────────────
+  //Helpers
+
 
   /// Safely extracts an error message whether the backend returned
-  /// JSON (e.g. {"message": "..."}) or plain text (e.g. "Username taken").
+  /// JSON (e.g. {"message": "..."}) or plain text.
   static String _extractErrorMessage(http.Response response) {
     try {
       final body = jsonDecode(response.body);
@@ -59,13 +69,29 @@ class ApiService {
       }
       return response.body;
     } catch (_) {
-      // Not valid JSON — it's plain text, use it directly.
       return response.body;
     }
   }
 
-  /// Extracts role and username from inside the JWT payload, since the
-  /// backend's login/register response only returns {"token": "..."}.
+  /// Safely extracts a success message whether the backend returned
+  /// JSON (e.g. {"message": "..."}) or plain text.
+  static String _extractSuccessMessage(http.Response response) {
+    try {
+      final body = jsonDecode(response.body);
+      if (body is Map && body['message'] != null) {
+        return body['message'].toString();
+      }
+      return response.body;
+    } catch (_) {
+      return response.body;
+    }
+  }
+
+  /// Extracts role, username, and the mustChangePassword flag from inside
+  /// the JWT payload, since the backend's login/register response only
+  /// returns {"token": "..."}.
+  static Map<String, dynamic> _extractClaimsFromToken(
+
   static Map<String, String> _extractRoleAndNameFromToken(
       String token, String fallbackUsername) {
     try {
@@ -73,16 +99,24 @@ class ApiService {
       final roles = decodedToken['roles'] as List<dynamic>?;
       final rawRole =
       (roles != null && roles.isNotEmpty) ? roles[0].toString() : '';
-      final role = rawRole.replaceFirst('ROLE_', ''); // "ROLE_DRIVER" -> "DRIVER"
+      final role = rawRole.replaceFirst('ROLE_', '');
       final username = decodedToken['sub']?.toString() ?? fallbackUsername;
-      return {'role': role, 'username': username};
+      final mustChangePassword = decodedToken['mustChangePassword'] == true;
+      return {
+        'role': role,
+        'username': username,
+        'mustChangePassword': mustChangePassword,
+      };
     } catch (_) {
-      // If decoding fails for any reason, fall back to empty role.
-      return {'role': '', 'username': fallbackUsername};
+      return {
+        'role': '',
+        'username': fallbackUsername,
+        'mustChangePassword': false,
+      };
     }
   }
 
-  // ─── API Calls ────────────────────────────────────────────────────────────
+  // API Calls
 
   static Future<Map<String, dynamic>> login(String username, String password) async {
     final response = await http.post(
@@ -91,16 +125,28 @@ class ApiService {
       body: jsonEncode({'username': username, 'password': password}),
     );
 
+    print("STATUS CODE: ${response.statusCode}");
+    print("BODY: ${response.body}");
+
     if (response.statusCode == 200) {
       final body = jsonDecode(response.body);
       final token = body['token'] ?? '';
 
-      final extracted = _extractRoleAndNameFromToken(token, username);
-      final role = extracted['role']!;
-      final resolvedUsername = extracted['username']!;
+      print('RAW TOKEN PAYLOAD: ${JwtDecoder.decode(token)}'); // DEBUG
 
-      await saveSession(token, role, resolvedUsername);
-      return {'success': true, 'role': role};
+      final claims = _extractClaimsFromToken(token, username);
+      print('DECODED CLAIMS: $claims'); // DEBUG
+
+      final role = claims['role'] as String;
+      final resolvedUsername = claims['username'] as String;
+      final mustChangePassword = claims['mustChangePassword'] as bool;
+
+      await saveSession(token, role, resolvedUsername, mustChangePassword);
+      return {
+        'success': true,
+        'role': role,
+        'mustChangePassword': mustChangePassword,
+      };
     } else {
       return {
         'success': false,
@@ -132,12 +178,51 @@ class ApiService {
       final body = jsonDecode(response.body);
       final token = body['token'] ?? '';
 
-      final extracted = _extractRoleAndNameFromToken(token, username);
-      final role = extracted['role']!;
-      final resolvedUsername = extracted['username']!;
+      final claims = _extractClaimsFromToken(token, username);
+      final role = claims['role'] as String;
+      final resolvedUsername = claims['username'] as String;
+      final mustChangePassword = claims['mustChangePassword'] as bool;
 
-      await saveSession(token, role, resolvedUsername);
-      return {'success': true, 'role': role};
+      await saveSession(token, role, resolvedUsername, mustChangePassword);
+      return {
+        'success': true,
+        'role': role,
+        'mustChangePassword': mustChangePassword,
+      };
+    } else {
+      return {
+        'success': false,
+        'message': _extractErrorMessage(response),
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    final token = await getToken();
+
+    final response = await http.post(
+      Uri.parse('${AppConstants.baseUrl}/auth/change-password'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        'oldPassword': oldPassword,
+        'newPassword': newPassword,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_mustChangePasswordKey, false);
+
+      return {
+        'success': true,
+        'message': _extractSuccessMessage(response),
+      };
     } else {
       return {
         'success': false,

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173") // Use specific origin instead of '*'
+@CrossOrigin(origins = "http://localhost:5173")
 public class AuthController {
 
     private final AuthService authService;
@@ -25,13 +25,11 @@ public class AuthController {
         }
     }
 
-    // Existing generic login (Keep this for Mobile/Admin Portal)
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
     }
 
-    // NEW: Specific endpoint for the Driver Web Portal
     @PostMapping("/driver/login")
     public ResponseEntity<?> driverLogin(@RequestBody LoginRequest request) {
         AuthResponse response = authService.login(request);
