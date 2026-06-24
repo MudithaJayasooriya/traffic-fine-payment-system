@@ -37,7 +37,14 @@ public class FineCategoryService {
         return repository.findById(id)
                 .orElseThrow();
     }
-
+    public List<FineCategory> search(String keyword) {
+        return repository.findAll().stream()
+                .filter(c ->
+                        c.getCategoryCode().toLowerCase().contains(keyword.toLowerCase()) ||
+                                c.getCategoryName().toLowerCase().contains(keyword.toLowerCase())
+                )
+                .toList();
+    }
     public void delete(Long id) {
         repository.deleteById(id);
     }
