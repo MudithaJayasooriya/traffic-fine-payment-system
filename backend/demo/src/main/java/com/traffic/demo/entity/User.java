@@ -34,11 +34,15 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    // Added fields
+
     @Column(unique = true)
     private String nicNumber;
 
     private String phoneNumber;
+
+    @Column(name = "must_change_password", nullable = false)
+    @Builder.Default
+    private boolean mustChangePassword = false;
 
     // 1. Maps your custom Enum role into Spring Security's authorization authorities
     @Override

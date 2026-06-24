@@ -19,5 +19,17 @@ public class AdminController {
     public ResponseEntity<String> registerOfficer(@RequestBody RegisterRequest request) {
         return ResponseEntity.ok(authService.registerOfficerByAdmin(request));
     }
-}
 
+    @PostMapping("/reset-password")
+    @PreAuthorize("hasRole('ADMIN')") // Only Admins can reset a user's password
+    public ResponseEntity<String> resetPassword(
+            @RequestParam String username,
+            @RequestParam String newPassword) {
+        try {
+            String message = authService.resetPasswordByAdmin(username, newPassword);
+            return ResponseEntity.ok(message);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+}

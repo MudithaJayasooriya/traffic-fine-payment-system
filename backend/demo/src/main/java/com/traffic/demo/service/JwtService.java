@@ -1,10 +1,10 @@
 package com.traffic.demo.service;
 
+import com.traffic.demo.entity.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
@@ -27,17 +27,21 @@ public class JwtService {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
 
         // CRITICAL: Add roles/authorities to the token claims
-        claims.put("roles", userDetails.getAuthorities().stream()
+        claims.put("roles", user.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList()));
 
+        // Tells the mobile app whether this user must be redirected
+        // to a forced password-reset screen (used for officer accounts).
+        claims.put("mustChangePassword", user.isMustChangePassword());
+
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(userDetails.getUsername())
+                .setSubject(user.getUsername())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
                 .signWith(getKey(), SignatureAlgorithm.HS256)
@@ -53,9 +57,9 @@ public class JwtService {
                 .getSubject();
     }
 
-    public boolean isTokenValid(String token, UserDetails userDetails) {
+    public boolean isTokenValid(String token, User user) {
         final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+        return (username.equals(user.getUsername())) && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {
