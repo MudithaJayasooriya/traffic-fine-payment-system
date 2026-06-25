@@ -71,6 +71,7 @@ public class AuthService {
         officer.setRole(Role.OFFICER);
         officer.setNicNumber(request.getNicNumber());
         officer.setPhoneNumber(request.getPhoneNumber());
+        officer.setMustChangePassword(true); // forces password reset on first login
 
         userRepository.save(officer);
         return "Traffic Officer registered successfully with username: " + inputUsername;
@@ -118,7 +119,7 @@ public class AuthService {
         return "Password reset successfully for officer: " + username;
     }
 
-// GET USERS BY ROLE
+    // GET USERS BY ROLE
     public List<User> getUsersByRole(Role role) {
         return userRepository.findByRole(role);
     }
