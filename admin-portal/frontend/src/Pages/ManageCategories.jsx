@@ -1,63 +1,53 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
+import API from "../api/axiosInstance";
 
 function ManageCategories() {
-  const [categories, setCategories] = useState([
-    {
-      id: 1,
-      categoryCode: "SPD001",
-      categoryName: "Speeding",
-      defaultAmount: 3000,
-      active: true,
-    },
-    {
-      id: 2,
-      categoryCode: "SEAT001",
-      categoryName: "Seat Belt",
-      defaultAmount: 2000,
-      active: true,
-    },
-  ]);
-
+  const [categories, setCategories] = useState([]); // Removed static array data initialization
   const [showForm, setShowForm] = useState(false);
-
   const [formData, setFormData] = useState({
     categoryCode: "",
     categoryName: "",
     defaultAmount: "",
     description: "",
-    active: true,
   });
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+  // Fetch initial collections upon rendering
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
-    setFormData({
-      ...formData,
-      [name]: type === "checkbox" ? checked : value,
-    });
+  const fetchCategories = async () => {
+    try {
+      const response = await API.get("/api/admin/categories");
+      setCategories(response.data);
+    } catch (error) {
+      console.error("Failed to load backend traffic code schemas", error);
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const newCategory = {
-      id: Date.now(),
-      ...formData,
-    };
-
-    setCategories([...categories, newCategory]);
-
-    setFormData({
-      categoryCode: "",
-      categoryName: "",
-      defaultAmount: "",
-      description: "",
-      active: true,
-    });
-
-    setShowForm(false);
+    try {
+      // Maps to @PostMapping("/api/admin/categories") inside backend
+      await API.post("/api/admin/categories", {
+        categoryCode: formData.categoryCode,
+        categoryName: formData.categoryName,
+        defaultAmount: parseFloat(formData.defaultAmount),
+        description: formData.description
+      });
+      
+      setFormData({ categoryCode: "", categoryName: "", defaultAmount: "", description: "" });
+      setShowForm(false);
+      fetchCategories(); // Refresh table view directly from database
+    } catch (error) {
+      alert("Error adding tracking definition payload: " + (error.response?.data || error.message));
+    }
   };
 
   return (
@@ -76,8 +66,7 @@ function ManageCategories() {
           </button>
         </div>
 
-        {/* Table */}
-
+        {/* Table container view */}
         <div className="mt-6 bg-white rounded-xl shadow overflow-hidden">
           <table className="w-full">
             <thead className="bg-slate-800 text-white">
@@ -85,68 +74,41 @@ function ManageCategories() {
                 <th className="p-3 text-left">Code</th>
                 <th className="p-3 text-left">Category</th>
                 <th className="p-3 text-left">Amount</th>
-                <th className="p-3 text-left">Status</th>
               </tr>
             </thead>
-
             <tbody>
-              {categories.map((category) => (
-                <tr
-                  key={category.id}
-                  className="border-b hover:bg-slate-50"
-                >
-                  <td className="p-3">
-                    {category.categoryCode}
-                  </td>
-
-                  <td className="p-3">
-                    {category.categoryName}
-                  </td>
-
-                  <td className="p-3">
-                    Rs. {category.defaultAmount}
-                  </td>
-
-                  <td className="p-3">
-                    {category.active ? (
-                      <span className="text-green-600 font-semibold">
-                        Active
-                      </span>
-                    ) : (
-                      <span className="text-red-600 font-semibold">
-                        Inactive
-                      </span>
-                    )}
-                  </td>
+              {categories.length === 0 ? (
+                <tr>
+                  <td colSpan="3" className="p-3 text-center text-gray-500">No category profiles created yet.</td>
                 </tr>
-              ))}
+              ) : (
+                categories.map((category) => (
+                  <tr key={category.id} className="border-b hover:bg-slate-50">
+                    <td className="p-3 font-medium">{category.categoryCode}</td>
+                    <td className="p-3">{category.categoryName}</td>
+                    <td className="p-3 text-cyan-700 font-semibold">Rs. {category.defaultAmount?.toLocaleString()}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
 
-        {/* Modal */}
-
+        {/* Modal form markup */}
         {showForm && (
           <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
             <div className="bg-white w-full max-w-lg rounded-xl p-6">
-              <h2 className="text-2xl font-bold mb-5">
-                Create Fine Category
-              </h2>
-
-              <form
-                onSubmit={handleSubmit}
-                className="space-y-4"
-              >
+              <h2 className="text-2xl font-bold mb-5">Create Fine Category</h2>
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <input
                   type="text"
                   name="categoryCode"
                   value={formData.categoryCode}
                   onChange={handleChange}
-                  placeholder="Category Code"
+                  placeholder="Category Code (e.g. SPD01)"
                   required
                   className="w-full border p-3 rounded-lg"
                 />
-
                 <input
                   type="text"
                   name="categoryName"
@@ -156,50 +118,28 @@ function ManageCategories() {
                   required
                   className="w-full border p-3 rounded-lg"
                 />
-
                 <input
                   type="number"
                   name="defaultAmount"
                   value={formData.defaultAmount}
                   onChange={handleChange}
-                  placeholder="Default Amount"
+                  placeholder="Default Fine Amount (Rs.)"
                   required
                   className="w-full border p-3 rounded-lg"
                 />
-
                 <textarea
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
-                  placeholder="Description"
+                  placeholder="Description details"
                   rows="3"
                   className="w-full border p-3 rounded-lg"
                 />
-
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    name="active"
-                    checked={formData.active}
-                    onChange={handleChange}
-                  />
-
-                  <label>Active</label>
-                </div>
-
                 <div className="flex justify-end gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setShowForm(false)}
-                    className="px-5 py-2 bg-gray-400 text-white rounded-lg"
-                  >
+                  <button type="button" onClick={() => setShowForm(false)} className="px-5 py-2 bg-gray-400 text-white rounded-lg">
                     Cancel
                   </button>
-
-                  <button
-                    type="submit"
-                    className="px-5 py-2 bg-blue-600 text-white rounded-lg"
-                  >
+                  <button type="submit" className="px-5 py-2 bg-blue-600 text-white rounded-lg">
                     Save Category
                   </button>
                 </div>
