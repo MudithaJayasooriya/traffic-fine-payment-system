@@ -12,4 +12,6 @@ public interface FineService {
     FineResponse getFineByReferenceNumber(String referenceNumber);
 
     List<FineResponse> getFinesByDriver(Long driverId);
+
+    void markAsPaid(String referenceNumber);
 }

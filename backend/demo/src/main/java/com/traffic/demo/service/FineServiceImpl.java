@@ -55,6 +55,7 @@ public class FineServiceImpl implements FineService {
         Fine savedFine = fineRepository.save(fine);
 
         return new FineResponse(
+                savedFine.getId(),
                 savedFine.getReferenceNumber(),
                 category.getCategoryCode(),
                 category.getCategoryName(),
@@ -75,6 +76,7 @@ public class FineServiceImpl implements FineService {
                         new FineNotFoundException("Fine not found"));
 
         return new FineResponse(
+                fine.getId(),
                 fine.getReferenceNumber(),
                 fine.getCategory().getCategoryCode(),
                 fine.getCategory().getCategoryName(),
@@ -93,6 +95,7 @@ public class FineServiceImpl implements FineService {
 
         return fines.stream().map(fine ->
                 new FineResponse(
+                        fine.getId(),
                         fine.getReferenceNumber(),
                         fine.getCategory().getCategoryCode(),
                         fine.getCategory().getCategoryName(),
@@ -103,5 +106,17 @@ public class FineServiceImpl implements FineService {
                         fine.getDriverId()
                 )
         ).toList();
+    }
+
+    @Override
+    public void markAsPaid(String referenceNumber) {
+
+        Fine fine = fineRepository
+                .findByReferenceNumber(referenceNumber)
+                .orElseThrow(() ->
+                        new FineNotFoundException("Fine not found: " + referenceNumber));
+
+        fine.setStatus("PAID");
+        fineRepository.save(fine);
     }
 }

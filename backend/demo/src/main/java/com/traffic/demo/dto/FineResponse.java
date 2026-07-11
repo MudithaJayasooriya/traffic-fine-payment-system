@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 public class FineResponse {
 
+    private Long id;
     private String referenceNumber;
     private String categoryCode;
     private String categoryName;
@@ -14,6 +15,7 @@ public class FineResponse {
     private Long driverId;
 
     public FineResponse(
+            Long id,
             String referenceNumber,
             String categoryCode,
             String categoryName,
@@ -23,6 +25,7 @@ public class FineResponse {
             Long officerId,
             Long driverId) {
 
+        this.id=id;
         this.referenceNumber = referenceNumber;
         this.categoryCode = categoryCode;
         this.categoryName = categoryName;
@@ -31,6 +34,10 @@ public class FineResponse {
         this.fineDate = fineDate;
         this.officerId = officerId;
         this.driverId = driverId;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getReferenceNumber() {

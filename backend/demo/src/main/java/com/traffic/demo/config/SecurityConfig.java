@@ -52,6 +52,7 @@ public class SecurityConfig {
 
                         // normal logged-in users
                         .requestMatchers("/api/categories", "/api/categories/{id}").permitAll()
+                        .requestMatchers("/api/payments/notify", "/api/payments/cancel", "/api/payments/return").permitAll()
 
                         // admin only (keep wildcard AFTER exclusions)
                         .requestMatchers("/api/categories/**").hasRole("ADMIN")
