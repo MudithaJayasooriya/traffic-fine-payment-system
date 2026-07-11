@@ -30,10 +30,15 @@ public class JwtService {
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
 
-        // CRITICAL: Add roles/authorities to the token claims
+        // Add roles/authorities
         claims.put("roles", userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList()));
+
+
+        if (userDetails instanceof com.traffic.demo.entity.User) {
+            claims.put("id", ((com.traffic.demo.entity.User) userDetails).getId());
+        }
 
         return Jwts.builder()
                 .setClaims(claims)

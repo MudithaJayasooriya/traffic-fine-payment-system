@@ -4,6 +4,7 @@ import java.util.List;
 import com.traffic.demo.dto.CreateFineRequest;
 import com.traffic.demo.dto.FineResponse;
 import com.traffic.demo.service.FineService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -34,5 +35,13 @@ public class FineController {
     @GetMapping("/driver/{driverId}")
     public List<FineResponse> getFinesByDriver(@PathVariable Long driverId) {
         return fineService.getFinesByDriver(driverId);
+    }
+
+    @PutMapping("/{referenceNumber}/mark-paid")
+    public ResponseEntity<String> markAsPaid(
+            @PathVariable String referenceNumber) {
+
+        fineService.markAsPaid(referenceNumber);
+        return ResponseEntity.ok("Fine marked as paid");
     }
 }

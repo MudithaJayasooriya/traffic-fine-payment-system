@@ -55,7 +55,7 @@ public class PaymentController {
 
     @PostMapping("/notify")
     public String paymentNotify(@RequestParam Map<String, String> data) {
-
+        System.out.println("received PayHere notification data: " + data);
         paymentService.handlePayHereNotification(data);
         return "OK";
     }
