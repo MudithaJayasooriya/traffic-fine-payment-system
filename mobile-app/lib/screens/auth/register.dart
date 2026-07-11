@@ -22,6 +22,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscureConfirm = true;
   String? _errorMessage;
 
+
   @override
   void dispose() {
     _usernameCtrl.dispose();

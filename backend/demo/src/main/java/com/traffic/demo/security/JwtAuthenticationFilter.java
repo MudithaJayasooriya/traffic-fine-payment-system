@@ -1,5 +1,6 @@
 package com.traffic.demo.security;
 
+import com.traffic.demo.entity.User;
 import com.traffic.demo.service.JwtService;
 import com.traffic.demo.service.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
@@ -10,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -45,16 +45,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
             // CustomUserDetailsService accepts the username identifier string perfectly
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            User user = (User) userDetailsService.loadUserByUsername(username);
 
-            // Fix 2: Pass the complete userDetails object to match the updated method signature
-            if (jwtService.isTokenValid(jwt, userDetails)) {
+            // Fix 2: Pass the concrete User object to match the updated method signature
+            if (jwtService.isTokenValid(jwt, user)) {
 
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
-                                userDetails,
+                                user,
                                 null,
-                                userDetails.getAuthorities()
+                                user.getAuthorities()
                         );
 
                 authToken.setDetails(

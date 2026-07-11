@@ -71,6 +71,7 @@ public class AuthService {
         officer.setRole(Role.OFFICER);
         officer.setNicNumber(request.getNicNumber());
         officer.setPhoneNumber(request.getPhoneNumber());
+        officer.setMustChangePassword(true); // forces password reset on first login
 
         userRepository.save(officer);
         return "Traffic Officer registered successfully with username: " + inputUsername;
@@ -89,7 +90,36 @@ public class AuthService {
         return new AuthResponse(token);
     }
 
-// GET USERS BY ROLE
+    // NEW: Forced password change (used by Officers on first login)
+    public String changePassword(String username, ChangePasswordRequest request) {
+        User user = getUserByUsername(username);
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Old password is incorrect.");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setMustChangePassword(false);
+        userRepository.save(user);
+
+        return "Password updated successfully.";
+    }
+
+    // NEW: Admin Route - Reset an OFFICER's password only (drivers are excluded)
+    public String resetPasswordByAdmin(String username, String newPassword) {
+        User user = getUserByUsername(username);
+
+        if (user.getRole() != Role.OFFICER) {
+            throw new IllegalArgumentException("Password reset via this endpoint is only allowed for Officer accounts.");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setMustChangePassword(true); // forces them to change it again on next login
+        userRepository.save(user);
+        return "Password reset successfully for officer: " + username;
+    }
+
+    // GET USERS BY ROLE
     public List<User> getUsersByRole(Role role) {
         return userRepository.findByRole(role);
     }

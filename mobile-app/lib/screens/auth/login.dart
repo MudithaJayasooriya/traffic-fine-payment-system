@@ -44,10 +44,25 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (result['success']) {
       final role = result['role'];
-      if (role == AppConstants.roleDriver) {
+      final mustChangePassword = result['mustChangePassword'] == true;
+
+      if (role == AppConstants.roleOfficer && mustChangePassword) {
+        // Officer logging in with a temporary password — must reset first
+        Navigator.pushReplacementNamed(context, '/reset-password');
+      } else if (role == AppConstants.roleDriver) {
         Navigator.pushReplacementNamed(context, '/driver-home');
       } else if (role == AppConstants.roleOfficer) {
         Navigator.pushReplacementNamed(context, '/officer-home');
+      } else if (role == AppConstants.roleAdmin) {
+        // Block admin accounts from logging in on mobile
+        await ApiService.logout();
+        setState(() {
+          _errorMessage = 'Admin accounts cannot log in from the mobile app.';
+        });
+      } else {
+        setState(() {
+          _errorMessage = 'Unrecognized role. Please contact support.';
+        });
       }
     } else {
       setState(() => _errorMessage = result['message']);
