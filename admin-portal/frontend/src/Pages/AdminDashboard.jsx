@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import StatCard from "../components/StatCard";
+import API from "../api/axiosInstance";
 
 function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -13,10 +14,9 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/dashboard/stats") // Replace with your backend URL
-      .then((res) => res.json())
-      .then((data) => {
-        setStats(data);
+    API.get("/api/dashboard/stats") // Using our safe API instance
+      .then((res) => {
+        setStats(res.data); // Axios wraps responses inside a .data object
         setLoading(false);
       })
       .catch((err) => {

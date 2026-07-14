@@ -1,20 +1,19 @@
 import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import API from "../api/axiosInstance";
+import { Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts"; // Removed BarChart imports
 
 function Statistics() {
-  const [districtData, setDistrictData] = useState([]);
   const [categoryData, setCategoryData] = useState([]);
   const [summary, setSummary] = useState({ totalRevenue: "0", totalFines: 0, paidFines: 0, pendingFines: 0 });
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/analytics/overview")
-      .then((res) => res.json())
-      .then((data) => {
-        setDistrictData(data.districtData || []);
-        setCategoryData(data.categoryData || []);
-        setSummary(data.summary || { totalRevenue: "0", totalFines: 0, paidFines: 0, pendingFines: 0 });
+    API.get("/api/analytics/overview")
+      .then((res) => {
+        // We keep fetching the payload normally, but only update what we use
+        setCategoryData(res.data.categoryData || []);
+        setSummary(res.data.summary || { totalRevenue: "0", totalFines: 0, paidFines: 0, pendingFines: 0 });
       })
       .catch((err) => console.error("Error loading analytical charts:", err));
   }, []);
@@ -47,20 +46,7 @@ function Statistics() {
           </div>
         </div>
 
-        {/* Bar Chart Container */}
-        <div className="bg-white rounded-xl shadow p-5 mt-6">
-          <h3 className="text-xl font-bold mb-4 text-slate-800">District Wise Collections</h3>
-          <ResponsiveContainer width="100%" height={350}>
-            <BarChart data={districtData}>
-              <XAxis dataKey="district" stroke="#64748b" />
-              <YAxis stroke="#64748b" />
-              <Tooltip />
-              <Bar dataKey="revenue" fill="#2563eb" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Pie Chart Container */}
+        {/* Pie Chart Container - Category Wise Collections */}
         <div className="bg-white rounded-xl shadow p-5 mt-6">
           <h3 className="text-xl font-bold mb-4 text-slate-800">Category Wise Collections</h3>
           <ResponsiveContainer width="100%" height={350}>

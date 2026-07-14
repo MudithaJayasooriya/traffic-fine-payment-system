@@ -18,6 +18,10 @@ function Login() {
     setError("");
     setLoading(true);
 
+    // 1. CLEAR OLD EXPIRED TOKENS BEFORE MAKING THE CALL
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("adminLoggedIn");
+
     try {
       // Connects directly to the user-auth backend controller route
       const response = await API.post("/auth/login", formData);

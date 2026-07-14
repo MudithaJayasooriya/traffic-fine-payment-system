@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import StatCard from "../components/StatCard";
+import API from "../api/axiosInstance";
 
 function RevenueReports() {
   const [reports, setReports] = useState([]);
@@ -11,20 +12,20 @@ function RevenueReports() {
   
   const [filters, setFilters] = useState({ startDate: "", endDate: "", district: "All Districts" });
 
-  const fetchReportData = () => {
+ const fetchReportData = () => {
     const queryParams = new URLSearchParams({
       startDate: filters.startDate,
       endDate: filters.endDate,
       district: filters.district,
     });
 
-    fetch(`http://localhost:8080/api/reports/revenue?${queryParams.toString()}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setReports(data.transactions || []);
-        setDistrictCollections(data.districtBreakdown || []);
-        setCategoryCollections(data.categoryBreakdown || []);
-        setSummary(data.summary || { totalRevenue: 0, paidFines: 0, collectedToday: 0 });
+    API.get(`/api/reports/revenue?${queryParams.toString()}`)
+      .then((res) => {
+        // Map data directly from Axios res.data payload
+        setReports(res.data.transactions || []);
+        setDistrictCollections(res.data.districtBreakdown || []);
+        setCategoryCollections(res.data.categoryBreakdown || []);
+        setSummary(res.data.summary || { totalRevenue: 0, paidFines: 0, collectedToday: 0 });
       })
       .catch((err) => console.error("Error fetching revenue reports:", err));
   };

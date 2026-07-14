@@ -1,25 +1,24 @@
 import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
+import API from "../api/axiosInstance";
 
 function PendingFines() {
   const [pendingFines, setPendingFines] = useState([]);
   const [summary, setSummary] = useState({ totalCount: 0, totalAmount: 0, overdueCount: 0 });
   const [filters, setFilters] = useState({ referenceNumber: "", driverNic: "", district: "All Districts" });
 
-  const fetchPendingData = () => {
-    // Build query params based on selected filters
+ const fetchPendingData = () => {
     const queryParams = new URLSearchParams();
     if (filters.referenceNumber) queryParams.append("ref", filters.referenceNumber);
     if (filters.driverNic) queryParams.append("nic", filters.driverNic);
     if (filters.district !== "All Districts") queryParams.append("district", filters.district);
 
-    fetch(`http://localhost:8080/api/fines/pending?${queryParams.toString()}`)
-      .then((res) => res.json())
-      .then((data) => {
-        // Expecting an object containing the array and metrics, or structure accordingly
-        setPendingFines(data.fines || []);
-        setSummary(data.summary || { totalCount: data.fines?.length || 0, totalAmount: 0, overdueCount: 0 });
+    API.get(`/api/fines/pending?${queryParams.toString()}`)
+      .then((res) => {
+        // Axios uses res.data, matching the structures you expect
+        setPendingFines(res.data.fines || []);
+        setSummary(res.data.summary || { totalCount: res.data.fines?.length || 0, totalAmount: 0, overdueCount: 0 });
       })
       .catch((err) => console.error("Error loading pending fines:", err));
   };
