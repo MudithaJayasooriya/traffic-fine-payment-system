@@ -14,9 +14,9 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    API.get("/api/dashboard/stats") // Using our safe API instance
+    API.get("/api/dashboard/stats") 
       .then((res) => {
-        setStats(res.data); // Axios wraps responses inside a .data object
+        setStats(res.data); 
         setLoading(false);
       })
       .catch((err) => {

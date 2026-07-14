@@ -4,7 +4,7 @@ import Header from "../components/Header";
 import API from "../api/axiosInstance";
 
 function ManageCategories() {
-  const [categories, setCategories] = useState([]); // Removed static array data initialization
+  const [categories, setCategories] = useState([]); 
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     categoryCode: "",

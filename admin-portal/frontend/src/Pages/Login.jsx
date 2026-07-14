@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUserShield } from "react-icons/fa";
-import API from "../api/axiosInstance"; // Import our new client configuration
+import API from "../api/axiosInstance"; 
 
 function Login() {
   const navigate = useNavigate();
@@ -18,16 +18,13 @@ function Login() {
     setError("");
     setLoading(true);
 
-    // 1. CLEAR OLD EXPIRED TOKENS BEFORE MAKING THE CALL
     localStorage.removeItem("adminToken");
     localStorage.removeItem("adminLoggedIn");
 
     try {
-      // Connects directly to the user-auth backend controller route
       const response = await API.post("/auth/login", formData);
       
       if (response.data && response.data.token) {
-        // Persist backend authorization state details across pages
         localStorage.setItem("adminToken", response.data.token);
         localStorage.setItem("adminLoggedIn", "true");
         navigate("/dashboard");

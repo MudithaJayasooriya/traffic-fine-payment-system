@@ -20,7 +20,6 @@ function ManageOfficers() {
 
   const fetchOfficers = async () => {
     try {
-      // Calls UserController's @GetMapping("/officers") endpoint
       const response = await API.get("/api/users/officers");
       setOfficers(response.data);
     } catch (error) {
@@ -35,12 +34,11 @@ function ManageOfficers() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Connects with AdminController's @PostMapping("/register-officer") route
       await API.post("/api/admin/register-officer", {
         username: formData.username,
         email: formData.email,
         password: formData.password,
-        role: "OFFICER", // Enforces backend Enum match constraint
+        role: "OFFICER", 
         nicNumber: formData.nicNumber,
         phoneNumber: formData.phoneNumber
       });

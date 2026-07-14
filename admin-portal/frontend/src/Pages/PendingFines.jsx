@@ -16,7 +16,6 @@ function PendingFines() {
 
     API.get(`/api/fines/pending?${queryParams.toString()}`)
       .then((res) => {
-        // Axios uses res.data, matching the structures you expect
         setPendingFines(res.data.fines || []);
         setSummary(res.data.summary || { totalCount: res.data.fines?.length || 0, totalAmount: 0, overdueCount: 0 });
       })
