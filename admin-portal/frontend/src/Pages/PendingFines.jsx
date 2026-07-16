@@ -1,183 +1,118 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
+import API from "../api/axiosInstance";
 
 function PendingFines() {
-  const [pendingFines] = useState([
-    {
-      id: 1,
-      referenceNumber: "RF20260001",
-      driverNic: "200112345678",
-      district: "Colombo",
-      category: "Speeding",
-      amount: 3000,
-      issueDate: "2026-06-01",
-      status: "PENDING",
-    },
-    {
-      id: 2,
-      referenceNumber: "RF20260002",
-      driverNic: "199923456789",
-      district: "Kandy",
-      category: "Seat Belt",
-      amount: 2000,
-      issueDate: "2026-06-03",
-      status: "PENDING",
-    },
-    {
-      id: 3,
-      referenceNumber: "RF20260003",
-      driverNic: "198812345678",
-      district: "Galle",
-      category: "Signal Violation",
-      amount: 5000,
-      issueDate: "2026-06-05",
-      status: "PENDING",
-    },
-  ]);
+  const [pendingFines, setPendingFines] = useState([]);
+  const [summary, setSummary] = useState({ totalCount: 0, totalAmount: 0, overdueCount: 0 });
+  const [filters, setFilters] = useState({ referenceNumber: "", driverNic: "", district: "All Districts" });
+
+ const fetchPendingData = () => {
+    const queryParams = new URLSearchParams();
+    if (filters.referenceNumber) queryParams.append("ref", filters.referenceNumber);
+    if (filters.driverNic) queryParams.append("nic", filters.driverNic);
+    if (filters.district !== "All Districts") queryParams.append("district", filters.district);
+
+    API.get(`/api/fines/pending?${queryParams.toString()}`)
+      .then((res) => {
+        // Axios uses res.data, matching the structures you expect
+        setPendingFines(res.data.fines || []);
+        setSummary(res.data.summary || { totalCount: res.data.fines?.length || 0, totalAmount: 0, overdueCount: 0 });
+      })
+      .catch((err) => console.error("Error loading pending fines:", err));
+  };
+
+  useEffect(() => {
+    fetchPendingData();
+  }, []);
+
+  const handleFilterChange = (e) => {
+    setFilters({ ...filters, [e.target.name]: e.target.value });
+  };
 
   return (
     <div className="flex">
       <Sidebar />
-
       <div className="flex-1 bg-slate-100 min-h-screen p-6">
         <Header title="Pending Fines" />
 
         {/* Summary Cards */}
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-6">
           <div className="bg-white p-5 rounded-xl shadow">
-            <h3 className="text-gray-500">
-              Total Pending Fines
-            </h3>
-
-            <p className="text-3xl font-bold mt-2">
-              430
-            </p>
+            <h3 className="text-gray-500">Total Pending Fines</h3>
+            <p className="text-3xl font-bold mt-2">{summary.totalCount}</p>
           </div>
-
           <div className="bg-white p-5 rounded-xl shadow">
-            <h3 className="text-gray-500">
-              Pending Amount
-            </h3>
-
-            <p className="text-3xl font-bold mt-2">
-              Rs. 1,250,000
-            </p>
+            <h3 className="text-gray-500">Pending Amount</h3>
+            <p className="text-3xl font-bold mt-2">Rs. {summary.totalAmount.toLocaleString()}</p>
           </div>
-
           <div className="bg-white p-5 rounded-xl shadow">
-            <h3 className="text-gray-500">
-              Overdue Fines
-            </h3>
-
-            <p className="text-3xl font-bold mt-2">
-              85
-            </p>
+            <h3 className="text-gray-500">Overdue Fines</h3>
+            <p className="text-3xl font-bold mt-2">{summary.overdueCount}</p>
           </div>
         </div>
 
         {/* Filters */}
-
         <div className="bg-white p-5 rounded-xl shadow mt-6">
-          <h3 className="font-bold text-lg mb-4">
-            Filter Pending Fines
-          </h3>
-
+          <h3 className="font-bold text-lg mb-4">Filter Pending Fines</h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-
             <input
               type="text"
+              name="referenceNumber"
+              value={filters.referenceNumber}
+              onChange={handleFilterChange}
               placeholder="Reference Number"
-              className="border p-3 rounded-lg"
+              className="border p-3 rounded-lg text-slate-800 bg-white"
             />
-
             <input
               type="text"
+              name="driverNic"
+              value={filters.driverNic}
+              onChange={handleFilterChange}
               placeholder="Driver NIC"
-              className="border p-3 rounded-lg"
+              className="border p-3 rounded-lg text-slate-800 bg-white"
             />
-
-            <select className="border p-3 rounded-lg">
+            <select 
+              name="district" 
+              value={filters.district} 
+              onChange={handleFilterChange} 
+              className="border p-3 rounded-lg text-slate-800 bg-white"
+            >
               <option>All Districts</option>
               <option>Colombo</option>
               <option>Kandy</option>
               <option>Galle</option>
             </select>
-
-            <button className="bg-blue-600 text-white rounded-lg">
+            <button onClick={fetchPendingData} className="bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
               Search
             </button>
-
           </div>
         </div>
 
         {/* Table */}
-
         <div className="bg-white rounded-xl shadow mt-6 overflow-hidden">
           <table className="w-full">
             <thead className="bg-slate-800 text-white">
               <tr>
-                <th className="p-3 text-left">
-                  Reference No
-                </th>
-
-                <th className="p-3 text-left">
-                  Driver NIC
-                </th>
-
-                <th className="p-3 text-left">
-                  District
-                </th>
-
-                <th className="p-3 text-left">
-                  Category
-                </th>
-
-                <th className="p-3 text-left">
-                  Amount
-                </th>
-
-                <th className="p-3 text-left">
-                  Issue Date
-                </th>
-
-                <th className="p-3 text-left">
-                  Status
-                </th>
+                <th className="p-3 text-left">Reference No</th>
+                <th className="p-3 text-left">Driver NIC</th>
+                <th className="p-3 text-left">District</th>
+                <th className="p-3 text-left">Category</th>
+                <th className="p-3 text-left">Amount</th>
+                <th className="p-3 text-left">Issue Date</th>
+                <th className="p-3 text-left">Status</th>
               </tr>
             </thead>
-
             <tbody>
               {pendingFines.map((fine) => (
-                <tr
-                  key={fine.id}
-                  className="border-b hover:bg-slate-50"
-                >
-                  <td className="p-3">
-                    {fine.referenceNumber}
-                  </td>
-
-                  <td className="p-3">
-                    {fine.driverNic}
-                  </td>
-
-                  <td className="p-3">
-                    {fine.district}
-                  </td>
-
-                  <td className="p-3">
-                    {fine.category}
-                  </td>
-
-                  <td className="p-3">
-                    Rs. {fine.amount}
-                  </td>
-
-                  <td className="p-3">
-                    {fine.issueDate}
-                  </td>
-
+                <tr key={fine.id} className="border-b hover:bg-slate-50 text-slate-700">
+                  <td className="p-3">{fine.referenceNumber}</td>
+                  <td className="p-3">{fine.driverNic}</td>
+                  <td className="p-3">{fine.district}</td>
+                  <td className="p-3">{fine.category}</td>
+                  <td className="p-3">Rs. {fine.amount.toLocaleString()}</td>
+                  <td className="p-3">{fine.issueDate}</td>
                   <td className="p-3">
                     <span className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-semibold">
                       {fine.status}
@@ -188,7 +123,6 @@ function PendingFines() {
             </tbody>
           </table>
         </div>
-
       </div>
     </div>
   );
