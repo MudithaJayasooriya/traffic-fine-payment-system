@@ -185,36 +185,46 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         if ("2".equals(status)) {
+            System.out.println();
+            System.out.println("===== PAYMENT COMPLETION =====");
+            System.out.println();
 
-            System.out.println("Processing successful payment for Payment ID: " + payment.getPayment_id());
+            Optional<Fine> fineOpt = fineRepository.findById(payment.getFineId());
+            if (fineOpt.isEmpty()) {
+                System.out.println("Error: Fine not found for fineId=" + payment.getFineId());
+                System.out.println("==============================");
+                return;
+            }
+            Fine fine = fineOpt.get();
+            System.out.println("Fine Reference : " + fine.getReferenceNumber());
+            System.out.println();
+            System.out.println("Payment ID : " + payment.getPayment_id());
+            System.out.println();
+            System.out.println("Old Status : " + oldStatus);
+            System.out.println();
 
             payment.setStatus("SUCCESS");
             payment.setPaymentDate(LocalDateTime.now());
             try {
                 payment = paymentRepository.saveAndFlush(payment);
-                System.out.println("updated payment status: " + payment.getStatus());
-                System.out.println("payment saved successfully: payment_id=" + payment.getPayment_id());
+                System.out.println("New Status : SUCCESS");
+                System.out.println();
+                System.out.println("Payment Saved Successfully");
+                System.out.println();
             } catch (Exception e) {
-                System.out.println("Exception saving payment entity: " + e.getMessage());
+                System.out.println("Error: Exception saving payment entity: " + e.getMessage());
+                System.out.println("==============================");
                 throw e; // roll back transaction
             }
-
-            // Update fine status to PAID
-            Optional<Fine> fineOpt = fineRepository.findById(payment.getFineId());
-            if (fineOpt.isEmpty()) {
-                System.out.println("Error: Fine not found for fineId=" + payment.getFineId());
-                return;
-            }
-
-            Fine fine = fineOpt.get();
-            System.out.println("fine found: fineId=" + fine.getId() + ", referenceNumber=" + fine.getReferenceNumber() + ", status=" + fine.getStatus());
 
             fine.setStatus("PAID");
             try {
                 fineRepository.saveAndFlush(fine);
-                System.out.println("Fine status updated and saved successfully to PAID");
+                System.out.println("Fine Updated -> PAID");
+                System.out.println();
             } catch (Exception e) {
-                System.out.println("Exception saving fine entity: " + e.getMessage());
+                System.out.println("Error: Exception saving fine entity: " + e.getMessage());
+                System.out.println("==============================");
                 throw e; // roll back transaction
             }
 
@@ -224,29 +234,33 @@ public class PaymentServiceImpl implements PaymentService {
                 System.out.println("Error: officer not found for officerId=" + fine.getOfficerId());
             } else {
                 User officer = officerOpt.get();
-                System.out.println("officer found: officerId=" + officer.getId() + ", username=" + officer.getUsername());
+                System.out.println("Officer ID : " + officer.getId());
+                System.out.println();
 
                 String officerPhone = officer.getPhoneNumber();
-                System.out.println("officer phone number: " + officerPhone);
+                System.out.println("Officer Phone : " + (officerPhone != null ? officerPhone : ""));
+                System.out.println();
 
                 if (officerPhone == null || officerPhone.trim().isEmpty()) {
                     System.out.println("Error: officer phone number is empty");
                 } else {
-                    String message = "Traffic Fine Payment Received.\n"
-                            + "Fine Reference: " + fine.getReferenceNumber() + "\n"
-                            + "Amount: LKR " + String.format("%.2f", payment.getAmount()) + "\n"
+                    String message = "Traffic Fine Paid Successfully\n"
+                            + "Reference Number: " + fine.getReferenceNumber() + "\n"
+                            + "Amount: " + payment.getAmount() + "\n"
+                            + "Driver ID: " + fine.getDriverId() + "\n"
                             + "Payment Status: SUCCESS";
 
                     try {
-                        System.out.println("SMS request sent: phone=" + officerPhone + ", message=" + message.replace("\n", " "));
+                        System.out.println("Sending SMS...");
+                        System.out.println();
                         smsService.sendSmsToOfficer(officerPhone, message);
-                        System.out.println("SMS response: SMS sent successfully");
+                        System.out.println("SMS Sent Successfully");
                     } catch (Exception e) {
-                        System.out.println("SMS response: SMS sending failed: Exception=" + e.getMessage());
+                        System.out.println("Error: SMS sending failed: Exception=" + e.getMessage());
                     }
                 }
             }
-
+            System.out.println("==============================");
         } else {
 
             System.out.println("Processing failed payment for Payment ID: " + payment.getPayment_id());
