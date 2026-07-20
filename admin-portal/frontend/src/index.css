@@ -3,12 +3,14 @@
 
 :root {
 	font-family: "Manrope", sans-serif;
+	font-size: 14px;
 	color: #eaf6ff;
 	background: #021022;
 	color-scheme: dark;
 }
 
 html, body, #root {
+	font-size: 14px;
 	min-height: 100vh;
 	margin: 0;
 	padding: 0;

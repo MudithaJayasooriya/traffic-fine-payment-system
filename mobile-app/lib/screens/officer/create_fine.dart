@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import '../../services/fine_service.dart';
-// Import your dashboard screen here
 import 'officer_dashboard.dart';
 
 class CreateFineScreen extends StatefulWidget {

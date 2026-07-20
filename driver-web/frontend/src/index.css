@@ -3,6 +3,7 @@
 
 :root {
 	font-family: "Manrope", sans-serif;
+	font-size: 14px;
 	color: #eaf6ff;
 	background:
 		radial-gradient(circle at top, rgba(89,166,255,0.06), transparent 34%),
@@ -11,10 +12,12 @@
 }
 
 html {
+	font-size: 14px;
 	scroll-behavior: smooth;
 }
 
 body {
+	font-size: 14px;
 	min-height: 100vh;
 	margin: 0;
 	font-family: inherit;
