@@ -5,15 +5,13 @@ import '../services/api_service.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
 class FineService {
-
-  final String baseUrl = "http://10.0.2.2:8080/api";
+  final String baseUrl = "http://localhost:8080/api";
 
   Future<Fine?> createFine(
-      String categoryCode,
-      int officerId,
-      int driverId,
-      ) async {
-
+    String categoryCode,
+    int officerId,
+    int driverId,
+  ) async {
     final token = await ApiService.getToken();
 
     final response = await http.post(
@@ -37,7 +35,6 @@ class FineService {
   }
 
   Future<Fine?> searchFine(String referenceNumber) async {
-
     final response = await http.get(
       Uri.parse("$baseUrl/fines/$referenceNumber"),
     );
@@ -73,7 +70,8 @@ class FineService {
         Uri.parse("$baseUrl/fines/driver/$driverId"),
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer $token", // This was missing and caused the issue!
+          "Authorization":
+              "Bearer $token", // This was missing and caused the issue!
         },
       );
 
@@ -81,7 +79,9 @@ class FineService {
         List<dynamic> data = jsonDecode(response.body);
         return data.map((fine) => Fine.fromJson(fine)).toList();
       } else {
-        print("FineService Backend Error: HTTP status code ${response.statusCode}");
+        print(
+          "FineService Backend Error: HTTP status code ${response.statusCode}",
+        );
       }
     } catch (e) {
       print("Error fetching driver fines from backend service: $e");
@@ -90,10 +90,7 @@ class FineService {
   }
 
   Future<List<dynamic>> getAllCategories() async {
-
-    final response = await http.get(
-      Uri.parse("$baseUrl/categories"),
-    );
+    final response = await http.get(Uri.parse("$baseUrl/categories"));
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -104,15 +101,10 @@ class FineService {
 
   // SEARCH CATEGORIES
   // Used when typing in search box
-  Future<List<dynamic>> searchCategories(
-      String keyword) async {
+  Future<List<dynamic>> searchCategories(String keyword) async {
+    final String url = "$baseUrl/categories/search?keyword=$keyword";
 
-    final String url =
-        "$baseUrl/categories/search?keyword=$keyword";
-
-    final response = await http.get(
-      Uri.parse(url),
-    );
+    final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -120,10 +112,9 @@ class FineService {
 
     return [];
   }
+
   Future<List<dynamic>> getAllDrivers() async {
-    final response = await http.get(
-        Uri.parse("$baseUrl/users/drivers"),
-    );
+    final response = await http.get(Uri.parse("$baseUrl/users/drivers"));
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -133,9 +124,7 @@ class FineService {
   }
 
   Future<List<dynamic>> getAllOfficers() async {
-    final response = await http.get(
-      Uri.parse("$baseUrl/users/officers"),
-    );
+    final response = await http.get(Uri.parse("$baseUrl/users/officers"));
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -144,7 +133,7 @@ class FineService {
     return [];
   }
 
-// GET USER BY ID (OFFICER)
+  // GET USER BY ID (OFFICER)
   Future<Map<String, dynamic>?> getUserById(int id) async {
     final response = await http.get(
       Uri.parse("$baseUrl/users/$id"),
@@ -170,7 +159,11 @@ class FineService {
     return [];
   }
 
-  Future<Map<String, dynamic>?> initiatePayment(String referenceNumber, double amount, int fineId) async {
+  Future<Map<String, dynamic>?> initiatePayment(
+    String referenceNumber,
+    double amount,
+    int fineId,
+  ) async {
     final token = await ApiService.getToken();
 
     // Get the actual fine ID from backend first
@@ -198,14 +191,14 @@ class FineService {
         "Authorization": "Bearer $token",
       },
       body: jsonEncode({
-        "fineId": fineId,         // ← real fine ID from DB
+        "fineId": fineId, // ← real fine ID from DB
         "amount": amount,
         "firstName": "Driver",
         "lastName": "User",
         "email": "driver@trafficfine.gov",
         "phone": "0771234567",
         "address": "Main Road",
-        "city": "Colombo"
+        "city": "Colombo",
       }),
     );
 
@@ -228,5 +221,4 @@ class FineService {
 
     return response.statusCode == 200;
   }
-
 }

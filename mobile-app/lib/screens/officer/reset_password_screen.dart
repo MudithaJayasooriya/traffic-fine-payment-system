@@ -54,159 +54,200 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false, // Mandatory — officer cannot navigate back until password is changed
+      canPop: false,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF5F7FA),
+        backgroundColor: const Color(0xFF021022),
         body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              children: [
-                const SizedBox(height: 60),
-                const Icon(Icons.lock_reset, size: 64, color: Color(0xFF1A3A6B)),
-                const SizedBox(height: 16),
-                const Text(
-                  'Reset Your Password',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1A3A6B),
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 72,
+                    height: 72,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF072B46),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFF4AA3FF).withOpacity(0.4)),
+                    ),
+                    child: const Icon(Icons.lock_reset, size: 38, color: Color(0xFF9FCAFF)),
                   ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'For security, you must change your temporary password before continuing.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 13, color: Colors.grey),
-                ),
-                const SizedBox(height: 28),
-
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.06),
-                        blurRadius: 16,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+                  const SizedBox(height: 16),
+                  const Text(
+                    'SECURITY UPDATE',
+                    style: TextStyle(
+                      fontSize: 11,
+                      letterSpacing: 2,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFD7A46B),
+                    ),
                   ),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        TextFormField(
-                          controller: _oldPasswordCtrl,
-                          obscureText: _obscureOld,
-                          decoration: InputDecoration(
-                            labelText: 'Temporary Password',
-                            prefixIcon: const Icon(Icons.lock_outline),
-                            suffixIcon: IconButton(
-                              icon: Icon(_obscureOld
-                                  ? Icons.visibility_off_outlined
-                                  : Icons.visibility_outlined),
-                              onPressed: () =>
-                                  setState(() => _obscureOld = !_obscureOld),
-                            ),
-                          ),
-                          validator: (v) => (v == null || v.isEmpty)
-                              ? 'Current password is required'
-                              : null,
-                        ),
-                        const SizedBox(height: 14),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Reset Your Password',
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFFFF6EA),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'For security, you must update your temporary password before continuing.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 13, color: Color(0xFFD3BFA8)),
+                  ),
+                  const SizedBox(height: 28),
 
-                        TextFormField(
-                          controller: _newPasswordCtrl,
-                          obscureText: _obscureNew,
-                          decoration: InputDecoration(
-                            labelText: 'New Password',
-                            prefixIcon: const Icon(Icons.lock_outline),
-                            suffixIcon: IconButton(
-                              icon: Icon(_obscureNew
-                                  ? Icons.visibility_off_outlined
-                                  : Icons.visibility_outlined),
-                              onPressed: () =>
-                                  setState(() => _obscureNew = !_obscureNew),
-                            ),
-                          ),
-                          validator: (v) {
-                            if (v == null || v.isEmpty) return 'New password is required';
-                            if (v.length < 6) return 'Minimum 6 characters';
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 14),
-
-                        TextFormField(
-                          controller: _confirmCtrl,
-                          obscureText: _obscureConfirm,
-                          decoration: InputDecoration(
-                            labelText: 'Confirm New Password',
-                            prefixIcon: const Icon(Icons.lock_outline),
-                            suffixIcon: IconButton(
-                              icon: Icon(_obscureConfirm
-                                  ? Icons.visibility_off_outlined
-                                  : Icons.visibility_outlined),
-                              onPressed: () => setState(
-                                      () => _obscureConfirm = !_obscureConfirm),
-                            ),
-                          ),
-                          validator: (v) {
-                            if (v == null || v.isEmpty) return 'Please confirm new password';
-                            if (v != _newPasswordCtrl.text) return 'Passwords do not match';
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 14),
-
-                        if (_errorMessage != null)
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.red.shade50,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.red.shade200),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(Icons.error_outline,
-                                    color: Colors.red.shade700, size: 18),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(_errorMessage!,
-                                      style: TextStyle(
-                                          color: Colors.red.shade700, fontSize: 13)),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                        const SizedBox(height: 20),
-
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: _isLoading ? null : _handleChangePassword,
-                            child: _isLoading
-                                ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                  color: Colors.white, strokeWidth: 2),
-                            )
-                                : const Text('Update Password',
-                                style: TextStyle(fontSize: 16)),
-                          ),
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF07223A).withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: const Color(0xFF164E70).withOpacity(0.6)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.4),
+                          blurRadius: 30,
+                          offset: const Offset(0, 12),
                         ),
                       ],
                     ),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          TextFormField(
+                            controller: _oldPasswordCtrl,
+                            obscureText: _obscureOld,
+                            style: const TextStyle(color: Color(0xFFEAF6FF)),
+                            decoration: InputDecoration(
+                              labelText: 'Temporary Password',
+                              prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF5AA3FF)),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscureOld
+                                      ? Icons.visibility_off_outlined
+                                      : Icons.visibility_outlined,
+                                  color: const Color(0xFF5AA3FF),
+                                ),
+                                onPressed: () =>
+                                    setState(() => _obscureOld = !_obscureOld),
+                              ),
+                            ),
+                            validator: (v) => (v == null || v.isEmpty)
+                                ? 'Current password is required'
+                                : null,
+                          ),
+                          const SizedBox(height: 14),
+
+                          TextFormField(
+                            controller: _newPasswordCtrl,
+                            obscureText: _obscureNew,
+                            style: const TextStyle(color: Color(0xFFEAF6FF)),
+                            decoration: InputDecoration(
+                              labelText: 'New Password',
+                              prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF5AA3FF)),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscureNew
+                                      ? Icons.visibility_off_outlined
+                                      : Icons.visibility_outlined,
+                                  color: const Color(0xFF5AA3FF),
+                                ),
+                                onPressed: () =>
+                                    setState(() => _obscureNew = !_obscureNew),
+                              ),
+                            ),
+                            validator: (v) {
+                              if (v == null || v.isEmpty) return 'New password is required';
+                              if (v.length < 6) return 'Minimum 6 characters';
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 14),
+
+                          TextFormField(
+                            controller: _confirmCtrl,
+                            obscureText: _obscureConfirm,
+                            style: const TextStyle(color: Color(0xFFEAF6FF)),
+                            decoration: InputDecoration(
+                              labelText: 'Confirm New Password',
+                              prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF5AA3FF)),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscureConfirm
+                                      ? Icons.visibility_off_outlined
+                                      : Icons.visibility_outlined,
+                                  color: const Color(0xFF5AA3FF),
+                                ),
+                                onPressed: () => setState(
+                                        () => _obscureConfirm = !_obscureConfirm),
+                              ),
+                            ),
+                            validator: (v) {
+                              if (v == null || v.isEmpty) return 'Please confirm new password';
+                              if (v != _newPasswordCtrl.text) return 'Passwords do not match';
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+
+                          if (_errorMessage != null)
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.red.shade900.withOpacity(0.3),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.red.shade700.withOpacity(0.5)),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.error_outline, color: Color(0xFFFF8A8A), size: 18),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(_errorMessage!,
+                                        style: const TextStyle(
+                                            color: Color(0xFFFF8A8A), fontSize: 13)),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                          const SizedBox(height: 20),
+
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _isLoading ? null : _handleChangePassword,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF4AA3FF),
+                                foregroundColor: const Color(0xFF021022),
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                          color: Color(0xFF021022), strokeWidth: 2),
+                                    )
+                                  : const Text('Update Password & Continue',
+                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 40),
-              ],
+                  const SizedBox(height: 30),
+                ],
+              ),
             ),
           ),
         ),

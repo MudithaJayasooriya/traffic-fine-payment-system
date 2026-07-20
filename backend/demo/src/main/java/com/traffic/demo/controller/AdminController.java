@@ -15,6 +15,7 @@ import java.util.ArrayList;
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class AdminController {
 
     private final AuthService authService;

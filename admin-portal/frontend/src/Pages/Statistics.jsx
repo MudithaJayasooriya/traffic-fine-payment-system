@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
+import StatCard from "../components/StatCard";
 import API from "../api/axiosInstance";
-import { Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts"; // Removed BarChart imports
+import { Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { FaMoneyBillWave, FaChartPie, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 
 function Statistics() {
   const [categoryData, setCategoryData] = useState([]);
@@ -11,59 +13,65 @@ function Statistics() {
   useEffect(() => {
     API.get("/api/analytics/overview")
       .then((res) => {
-        // We keep fetching the payload normally, but only update what we use
         setCategoryData(res.data.categoryData || []);
         setSummary(res.data.summary || { totalRevenue: "0", totalFines: 0, paidFines: 0, pendingFines: 0 });
       })
       .catch((err) => console.error("Error loading analytical charts:", err));
   }, []);
 
-  const COLORS = ["#2563eb", "#16a34a", "#f59e0b", "#dc2626"];
+  const COLORS = ["#4aa3ff", "#1fc97a", "#d7a46b", "#ff8a4d", "#7bd5ff", "#ff5252"];
 
   return (
-    <div className="flex">
+    <div className="flex" style={{ backgroundColor: "#021022", minHeight: "100vh", color: "#eaf6ff" }}>
       <Sidebar />
-      <div className="flex-1 bg-slate-100 min-h-screen p-6">
-        <Header title="Statistics & Analytics" />
+      <div className="flex-1 p-6" style={{ backgroundColor: "#021022", minHeight: "100vh" }}>
+        <Header title="Statistics & Analytics" subtitle="Interactive fine distribution charts and system analytics" />
 
-        {/* Top Summary Blocks */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mt-6">
-          <div className="bg-white rounded-xl shadow p-5">
-            <h3 className="text-gray-500">Total Revenue</h3>
-            <p className="text-3xl font-bold mt-2 text-slate-800">{summary.totalRevenue}</p>
-          </div>
-          <div className="bg-white rounded-xl shadow p-5">
-            <h3 className="text-gray-500">Total Fines</h3>
-            <p className="text-3xl font-bold mt-2 text-slate-800">{summary.totalFines.toLocaleString()}</p>
-          </div>
-          <div className="bg-white rounded-xl shadow p-5">
-            <h3 className="text-gray-500">Paid Fines</h3>
-            <p className="text-3xl font-bold mt-2 text-slate-800">{summary.paidFines.toLocaleString()}</p>
-          </div>
-          <div className="bg-white rounded-xl shadow p-5">
-            <h3 className="text-gray-500">Pending Fines</h3>
-            <p className="text-3xl font-bold mt-2 text-slate-800">{summary.pendingFines.toLocaleString()}</p>
-          </div>
+        {/* Top Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
+          <StatCard title="Total Revenue" value={`Rs. ${summary.totalRevenue}`} icon={FaMoneyBillWave} color="text-[#1fc97a]" />
+          <StatCard title="Total Fines Issued" value={summary.totalFines.toLocaleString()} icon={FaChartPie} color="text-[#4aa3ff]" />
+          <StatCard title="Settled Fines" value={summary.paidFines.toLocaleString()} icon={FaCheckCircle} color="text-[#7bd5ff]" />
+          <StatCard title="Pending Fines" value={summary.pendingFines.toLocaleString()} icon={FaExclamationTriangle} color="text-[#ff8a4d]" />
         </div>
 
-        {/* Pie Chart Container - Category Wise Collections */}
-        <div className="bg-white rounded-xl shadow p-5 mt-6">
-          <h3 className="text-xl font-bold mb-4 text-slate-800">Category Wise Collections</h3>
-          <ResponsiveContainer width="100%" height={350}>
+        {/* Category Wise Collections Chart Container */}
+        <div className="rounded-2xl shadow-xl p-6 mt-6 border" style={{ backgroundColor: "#07223a", borderColor: "#164e70" }}>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-xl font-bold" style={{ color: "#ffffff" }}>Violation Category Breakdown</h3>
+              <p className="text-xs mt-0.5" style={{ color: "#aacde9" }}>Distribution of fines issued across category types</p>
+            </div>
+            <span className="text-xs font-semibold px-3 py-1 rounded-full border" style={{ backgroundColor: "#072b46", color: "#4aa3ff", borderColor: "rgba(74, 163, 255, 0.3)" }}>
+              REAL-TIME DATA
+            </span>
+          </div>
+
+          <ResponsiveContainer width="100%" height={360}>
             <PieChart>
               <Pie
                 data={categoryData}
                 cx="50%"
                 cy="50%"
-                outerRadius={120}
+                outerRadius={130}
+                innerRadius={50}
+                paddingAngle={3}
                 dataKey="value"
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
               >
                 {categoryData.map((entry, index) => (
-                  <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                  <Cell key={index} fill={COLORS[index % COLORS.length]} stroke="#07223a" strokeWidth={2} />
                 ))}
               </Pie>
-              <Tooltip />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#06223b",
+                  borderColor: "#214f73",
+                  borderRadius: "12px",
+                  color: "#ffffff",
+                  boxShadow: "0 10px 25px rgba(0,0,0,0.5)"
+                }}
+              />
             </PieChart>
           </ResponsiveContainer>
         </div>

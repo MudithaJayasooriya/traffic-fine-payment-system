@@ -3,6 +3,7 @@ import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import StatCard from "../components/StatCard";
 import API from "../api/axiosInstance";
+import { FaMoneyBillWave, FaCheckCircle, FaCalendarDay } from "react-icons/fa";
 
 function RevenueReports() {
   const [reports, setReports] = useState([]);
@@ -12,7 +13,7 @@ function RevenueReports() {
   
   const [filters, setFilters] = useState({ startDate: "", endDate: "", district: "All Districts" });
 
- const fetchReportData = () => {
+  const fetchReportData = () => {
     const queryParams = new URLSearchParams({
       startDate: filters.startDate,
       endDate: filters.endDate,
@@ -21,7 +22,6 @@ function RevenueReports() {
 
     API.get(`/api/reports/revenue?${queryParams.toString()}`)
       .then((res) => {
-        // Map data directly from Axios res.data payload
         setReports(res.data.transactions || []);
         setDistrictCollections(res.data.districtBreakdown || []);
         setCategoryCollections(res.data.categoryBreakdown || []);
@@ -35,114 +35,133 @@ function RevenueReports() {
   }, []);
 
   return (
-    <div className="flex">
+    <div className="flex min-h-screen" style={{ backgroundColor: "#021022", color: "#eaf6ff" }}>
       <Sidebar />
-      <div className="flex-1 bg-slate-100 min-h-screen p-6">
-        <Header title="Revenue Reports" />
+      <div className="flex-1 p-6" style={{ backgroundColor: "#021022", minHeight: "100vh" }}>
+        <Header title="Revenue Reports" subtitle="Financial breakdown and settlement metrics across Sri Lanka" />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-6">
-          <StatCard title="Total Revenue" value={`Rs. ${summary.totalRevenue.toLocaleString()}`} />
-          <StatCard title="Paid Fines" value={summary.paidFines} />
-          <StatCard title="Collected Today" value={`Rs. ${summary.collectedToday.toLocaleString()}`} />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+          <StatCard title="Total Revenue" value={`Rs. ${summary.totalRevenue.toLocaleString()}`} icon={FaMoneyBillWave} color="text-[#1fc97a]" />
+          <StatCard title="Total Settled Fines" value={summary.paidFines} icon={FaCheckCircle} color="text-[#4aa3ff]" />
+          <StatCard title="Collected Today" value={`Rs. ${summary.collectedToday.toLocaleString()}`} icon={FaCalendarDay} color="text-[#d7a46b]" />
         </div>
 
-        {/* Filters */}
-        <div className="bg-white rounded-xl shadow p-5 mt-6">
-          <h3 className="font-bold text-lg mb-4 text-slate-800">Filter Reports</h3>
+        {/* Filters Container */}
+        <div className="p-6 rounded-3xl shadow-xl mt-6 border" style={{ backgroundColor: "#062033", borderColor: "rgba(31, 79, 120, 0.6)" }}>
+          <h3 className="font-bold text-base mb-4" style={{ color: "#eaf6ff" }}>Generate Revenue Report</h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <input
               type="date"
-              className="border p-3 rounded-lg text-slate-800 bg-white"
+              className="px-4 py-3 rounded-xl outline-none border text-sm"
+              style={{ backgroundColor: "#06223b", borderColor: "#214f73", color: "#eaf6ff" }}
               value={filters.startDate}
               onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
             />
             <input
               type="date"
-              className="border p-3 rounded-lg text-slate-800 bg-white"
+              className="px-4 py-3 rounded-xl outline-none border text-sm"
+              style={{ backgroundColor: "#06223b", borderColor: "#214f73", color: "#eaf6ff" }}
               value={filters.endDate}
               onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
             />
             <select
-              className="border p-3 rounded-lg text-slate-800 bg-white"
+              className="px-4 py-3 rounded-xl outline-none border text-sm"
+              style={{ backgroundColor: "#06223b", borderColor: "#214f73", color: "#eaf6ff" }}
               value={filters.district}
               onChange={(e) => setFilters({ ...filters, district: e.target.value })}
             >
-              <option>All Districts</option>
-              <option>Colombo</option>
-              <option>Kandy</option>
-              <option>Galle</option>
+              <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>All Districts</option>
+              <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>Colombo</option>
+              <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>Kandy</option>
+              <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>Galle</option>
             </select>
-            <button onClick={fetchReportData} className="bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-              Generate Report
+            <button onClick={fetchReportData} className="font-bold py-3 rounded-xl transition cursor-pointer shadow-lg hover:brightness-110" style={{ backgroundColor: "#4aa3ff", color: "#021022" }}>
+              Filter Reports
             </button>
           </div>
         </div>
 
         {/* District & Category Collections side-by-side split */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-          <div className="bg-white rounded-xl shadow p-5">
-            <h3 className="font-bold text-lg mb-4 text-slate-800">District Wise Collections</h3>
-            <table className="w-full text-slate-700">
-              <thead className="bg-slate-800 text-white">
+          <div className="rounded-3xl shadow-xl p-6 border overflow-hidden" style={{ backgroundColor: "#062033", borderColor: "rgba(31, 79, 120, 0.6)" }}>
+            <h3 className="font-bold text-base mb-4" style={{ color: "#eaf6ff" }}>District-wise Breakdown</h3>
+            <table className="w-full text-left text-sm border-collapse" style={{ backgroundColor: "#062033" }}>
+              <thead style={{ backgroundColor: "#07233f", color: "#eaf6ff" }}>
                 <tr>
-                  <th className="p-3 text-left">District</th>
-                  <th className="p-3 text-left">Collection</th>
+                  <th className="p-3 font-bold text-xs uppercase tracking-wider" style={{ color: "#9fcfff" }}>District</th>
+                  <th className="p-3 font-bold text-xs uppercase tracking-wider text-right" style={{ color: "#9fcfff" }}>Collection</th>
                 </tr>
               </thead>
-              <tbody>
-                {districtCollections.map((item, index) => (
-                  <tr key={index} className="border-b">
-                    <td className="p-3">{item.district}</td>
-                    <td className="p-3">Rs. {item.collection.toLocaleString()}</td>
-                  </tr>
-                ))}
+              <tbody className="text-sm" style={{ backgroundColor: "#062033" }}>
+                {districtCollections.length === 0 ? (
+                  <tr><td colSpan="2" className="p-4 text-center" style={{ color: "#aacde9" }}>No district breakdown available.</td></tr>
+                ) : (
+                  districtCollections.map((item, index) => (
+                    <tr key={index} style={{ backgroundColor: index % 2 === 0 ? "#071d31" : "#062033", borderBottom: "1px solid rgba(31, 79, 120, 0.4)" }}>
+                      <td className="p-3 font-bold" style={{ color: "#eaf6ff" }}>{item.district}</td>
+                      <td className="p-3 text-right font-extrabold" style={{ color: "#1fc97a" }}>Rs. {item.collection.toLocaleString()}</td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
 
-          <div className="bg-white rounded-xl shadow p-5">
-            <h3 className="font-bold text-lg mb-4 text-slate-800">Category Wise Collections</h3>
-            <table className="w-full text-slate-700">
-              <thead className="bg-slate-800 text-white">
+          <div className="rounded-3xl shadow-xl p-6 border overflow-hidden" style={{ backgroundColor: "#062033", borderColor: "rgba(31, 79, 120, 0.6)" }}>
+            <h3 className="font-bold text-base mb-4" style={{ color: "#eaf6ff" }}>Category-wise Breakdown</h3>
+            <table className="w-full text-left text-sm border-collapse" style={{ backgroundColor: "#062033" }}>
+              <thead style={{ backgroundColor: "#07233f", color: "#eaf6ff" }}>
                 <tr>
-                  <th className="p-3 text-left">Category</th>
-                  <th className="p-3 text-left">Collection</th>
+                  <th className="p-3 font-bold text-xs uppercase tracking-wider" style={{ color: "#9fcfff" }}>Category</th>
+                  <th className="p-3 font-bold text-xs uppercase tracking-wider text-right" style={{ color: "#9fcfff" }}>Collection</th>
                 </tr>
               </thead>
-              <tbody>
-                {categoryCollections.map((item, index) => (
-                  <tr key={index} className="border-b">
-                    <td className="p-3">{item.category}</td>
-                    <td className="p-3">Rs. {item.collection.toLocaleString()}</td>
-                  </tr>
-                ))}
+              <tbody className="text-sm" style={{ backgroundColor: "#062033" }}>
+                {categoryCollections.length === 0 ? (
+                  <tr><td colSpan="2" className="p-4 text-center" style={{ color: "#aacde9" }}>No category breakdown available.</td></tr>
+                ) : (
+                  categoryCollections.map((item, index) => (
+                    <tr key={index} style={{ backgroundColor: index % 2 === 0 ? "#071d31" : "#062033", borderBottom: "1px solid rgba(31, 79, 120, 0.4)" }}>
+                      <td className="p-3 font-bold" style={{ color: "#eaf6ff" }}>{item.category}</td>
+                      <td className="p-3 text-right font-extrabold" style={{ color: "#4aa3ff" }}>Rs. {item.collection.toLocaleString()}</td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* Detailed Logs Table */}
-        <div className="bg-white rounded-xl shadow mt-6 overflow-hidden">
-          <table className="w-full text-slate-700">
-            <thead className="bg-slate-800 text-white">
+        {/* Detailed Transactions Table */}
+        <div className="rounded-3xl shadow-2xl mt-6 overflow-hidden border" style={{ backgroundColor: "#062033", borderColor: "rgba(31, 79, 120, 0.6)" }}>
+          <table className="w-full text-left border-collapse" style={{ backgroundColor: "#062033" }}>
+            <thead style={{ backgroundColor: "#07233f", color: "#eaf6ff" }}>
               <tr>
-                <th className="p-3 text-left">District</th>
-                <th className="p-3 text-left">Category</th>
-                <th className="p-3 text-left">Amount</th>
-                <th className="p-3 text-left">Date</th>
-                <th className="p-3 text-left">Status</th>
+                <th className="p-4 font-bold text-xs uppercase tracking-wider" style={{ color: "#9fcfff" }}>District</th>
+                <th className="p-4 font-bold text-xs uppercase tracking-wider" style={{ color: "#9fcfff" }}>Category</th>
+                <th className="p-4 font-bold text-xs uppercase tracking-wider" style={{ color: "#9fcfff" }}>Settled Amount</th>
+                <th className="p-4 font-bold text-xs uppercase tracking-wider" style={{ color: "#9fcfff" }}>Settlement Date</th>
+                <th className="p-4 font-bold text-xs uppercase tracking-wider" style={{ color: "#9fcfff" }}>Status</th>
               </tr>
             </thead>
-            <tbody>
-              {reports.map((report) => (
-                <tr key={report.id} className="border-b hover:bg-slate-50">
-                  <td className="p-3">{report.district}</td>
-                  <td className="p-3">{report.category}</td>
-                  <td className="p-3">Rs. {report.amount.toLocaleString()}</td>
-                  <td className="p-3">{report.date}</td>
-                  <td className="p-3 text-green-600 font-semibold">{report.status}</td>
-                </tr>
-              ))}
+            <tbody className="text-sm" style={{ backgroundColor: "#062033" }}>
+              {reports.length === 0 ? (
+                <tr><td colSpan="5" className="p-8 text-center font-medium" style={{ color: "#aacde9", backgroundColor: "#062033" }}>No settlement transaction logs available.</td></tr>
+              ) : (
+                reports.map((report, index) => (
+                  <tr key={report.id} style={{ backgroundColor: index % 2 === 0 ? "#071d31" : "#062033", borderBottom: "1px solid rgba(31, 79, 120, 0.4)" }}>
+                    <td className="p-4 font-bold" style={{ color: "#eaf6ff" }}>{report.district}</td>
+                    <td className="p-4 font-bold" style={{ color: "#eaf6ff" }}>{report.category}</td>
+                    <td className="p-4 font-extrabold" style={{ color: "#1fc97a" }}>Rs. {report.amount?.toLocaleString()}</td>
+                    <td className="p-4 font-medium" style={{ color: "#aacde9" }}>{report.date}</td>
+                    <td className="p-4">
+                      <span className="inline-flex rounded-full px-3 py-1 text-xs font-extrabold" style={{ backgroundColor: "#1fc97a", color: "#021022" }}>
+                        SETTLED
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

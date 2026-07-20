@@ -41,30 +41,61 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Traffic Fine App',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF1A3A6B),
-          brightness: Brightness.light,
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: const Color(0xFF021022),
+        colorScheme: const ColorScheme.dark(
+          primary: Color(0xFF4AA3FF),
+          secondary: Color(0xFF7BD5FF),
+          surface: Color(0xFF07223A),
+          background: Color(0xFF021022),
+          onPrimary: Color(0xFF021022),
+          onSurface: Color(0xFFEAF6FF),
         ),
         useMaterial3: true,
-        fontFamily: 'Roboto',
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF07223A),
+          foregroundColor: Color(0xFFEAF6FF),
+          elevation: 0,
+          centerTitle: true,
+        ),
+        cardTheme: const CardThemeData(
+          color: Color(0xFF062033),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(20)),
+            side: BorderSide(color: Color(0xFF1F4F78), width: 1),
+          ),
+          elevation: 4,
+        ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF1A3A6B),
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            backgroundColor: const Color(0xFF4AA3FF),
+            foregroundColor: const Color(0xFF021022),
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(16),
             ),
+            textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
         ),
         inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: const Color(0xFF06223B),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: Color(0xFF214F73)),
           ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: Color(0xFF214F73)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: Color(0xFF5AA3FF), width: 2),
+          ),
+          hintStyle: const TextStyle(color: Color(0xFFAACDE9)),
           contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
+            horizontal: 18,
+            vertical: 16,
           ),
         ),
       ),

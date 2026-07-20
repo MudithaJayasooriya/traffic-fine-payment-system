@@ -27,12 +27,15 @@ class _SearchFineScreenState extends State<SearchFineScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: const Color(0xFF021022),
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.black,
-        title: const Text("Search Database", style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: const Color(0xFF07223A),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF9FCAFF)),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text("Search Traffic Fines", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFFFF6EA))),
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -44,18 +47,19 @@ class _SearchFineScreenState extends State<SearchFineScreen> {
                 Expanded(
                   child: TextField(
                     controller: controller,
+                    style: const TextStyle(color: Color(0xFFEAF6FF)),
                     decoration: InputDecoration(
-                      hintText: "Enter Reference Number",
-                      prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                      hintText: "Enter Fine Reference (e.g. FINE-XXXX)",
+                      prefixIcon: const Icon(Icons.search, color: Color(0xFF5AA3FF)),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: const Color(0xFF06223B),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: Colors.grey[200]!),
+                        borderSide: const BorderSide(color: Color(0xFF214F73)),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(color: Color(0xFF3B82F6), width: 2),
+                        borderSide: const BorderSide(color: Color(0xFF5AA3FF), width: 2),
                       ),
                     ),
                   ),
@@ -66,11 +70,11 @@ class _SearchFineScreenState extends State<SearchFineScreen> {
                   child: ElevatedButton(
                     onPressed: search,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1E3A8A),
-                      foregroundColor: Colors.white,
+                      backgroundColor: const Color(0xFF4AA3FF),
+                      foregroundColor: const Color(0xFF021022),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     ),
-                    child: const Icon(Icons.arrow_forward_ios_rounded, size: 18),
+                    child: const Icon(Icons.search, size: 22),
                   ),
                 ),
               ],
@@ -83,11 +87,11 @@ class _SearchFineScreenState extends State<SearchFineScreen> {
             else if (hasSearched)
               Column(
                 children: [
-                  Icon(Icons.folder_off_rounded, size: 64, color: Colors.grey[300]),
+                  Icon(Icons.folder_off_rounded, size: 64, color: Colors.blueGrey.shade700),
                   const SizedBox(height: 16),
-                  Text(
-                    "No record found",
-                    style: TextStyle(color: Colors.grey[600], fontSize: 16, fontWeight: FontWeight.w500),
+                  const Text(
+                    "No fine record found for this reference.",
+                    style: TextStyle(color: Color(0xFFAACDE9), fontSize: 16, fontWeight: FontWeight.w500),
                   ),
                 ],
               )
@@ -98,17 +102,18 @@ class _SearchFineScreenState extends State<SearchFineScreen> {
   }
 
   Widget _buildTicketResult() {
-    final isPaid = fine!.status.toLowerCase() == 'paid';
+    final statusUpper = fine!.status.toUpperCase();
+    final isPaid = statusUpper == 'PAID' || statusUpper == 'SUCCESS';
 
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF07223A),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: const Color(0xFF164E70)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withOpacity(0.3),
             blurRadius: 20,
             offset: const Offset(0, 8),
           )
@@ -126,10 +131,11 @@ class _SearchFineScreenState extends State<SearchFineScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("REFERENCE ID", style: TextStyle(fontSize: 11, color: Colors.grey[400], fontWeight: FontWeight.bold)),
+                    const Text("REFERENCE NUMBER", style: TextStyle(fontSize: 10, color: Color(0xFFD7A46B), fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                    const SizedBox(height: 4),
                     Text(
                       fine!.referenceNumber,
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFFFF6EA), letterSpacing: 0.5),
                     ),
                   ],
                 ),
@@ -137,13 +143,14 @@ class _SearchFineScreenState extends State<SearchFineScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                   decoration: BoxDecoration(
-                    color: isPaid ? Colors.green[50] : Colors.orange[50],
+                    color: isPaid ? const Color(0xFF1FC97A).withOpacity(0.2) : const Color(0xFFFF8A4D).withOpacity(0.2),
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: isPaid ? const Color(0xFF1FC97A).withOpacity(0.5) : const Color(0xFFFF8A4D).withOpacity(0.5)),
                   ),
                   child: Text(
-                    fine!.status.toUpperCase(),
+                    isPaid ? 'PAID' : 'UNPAID',
                     style: TextStyle(
-                      color: isPaid ? Colors.green[700] : Colors.orange[700],
+                      color: isPaid ? const Color(0xFF1FC97A) : const Color(0xFFFF8A4D),
                       fontWeight: FontWeight.bold,
                       fontSize: 12,
                     ),
@@ -157,9 +164,9 @@ class _SearchFineScreenState extends State<SearchFineScreen> {
           Row(
             children: List.generate(
               30,
-                  (index) => Expanded(
+              (index) => Expanded(
                 child: Container(
-                  color: index % 2 == 0 ? Colors.transparent : Colors.grey[200],
+                  color: index % 2 == 0 ? Colors.transparent : const Color(0xFF164E70),
                   height: 2,
                 ),
               ),
@@ -172,11 +179,11 @@ class _SearchFineScreenState extends State<SearchFineScreen> {
             child: Column(
               children: [
                 _buildTicketRow("Category", fine!.categoryName),
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
                 _buildTicketRow(
                   "Total Fine Amount",
-                  "\$${fine!.amount}", // Replace with currency sign of choice
-                  valueColor: const Color(0xFF1E3A8A),
+                  "LKR ${fine!.amount.toStringAsFixed(2)}",
+                  valueColor: const Color(0xFF4AA3FF),
                   isBold: true,
                 ),
               ],
@@ -191,12 +198,12 @@ class _SearchFineScreenState extends State<SearchFineScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: TextStyle(color: Colors.grey[500], fontSize: 14)),
+        Text(label, style: const TextStyle(color: Color(0xFFAACDE9), fontSize: 14)),
         Text(
           value,
           style: TextStyle(
-            color: valueColor ?? Colors.grey[800],
-            fontSize: isBold ? 18 : 15,
+            color: valueColor ?? const Color(0xFFFFF6EA),
+            fontSize: isBold ? 18 : 14,
             fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
           ),
         ),

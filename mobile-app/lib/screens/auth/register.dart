@@ -63,50 +63,58 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: const Color(0xFF021022),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF1A3A6B)),
+          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF9FCAFF)),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
           child: Column(
             children: [
-              const SizedBox(height: 8),
-              // Header
-              const Icon(Icons.person_add_outlined,
-                  size: 48, color: Color(0xFF1A3A6B)),
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF072B46),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: const Color(0xFF4AA3FF).withOpacity(0.4)),
+                ),
+                child: const Icon(Icons.person_add_outlined, size: 34, color: Color(0xFF9FCAFF)),
+              ),
               const SizedBox(height: 12),
               const Text(
                 'Create Driver Account',
                 style: TextStyle(
-                  fontSize: 22,
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1A3A6B),
+                  color: Color(0xFFFFF6EA),
                 ),
               ),
+              const SizedBox(height: 4),
               const Text(
-                'Register to pay traffic fines easily',
-                style: TextStyle(fontSize: 13, color: Colors.grey),
+                'Register your driver profile to manage & pay fines',
+                style: TextStyle(fontSize: 13, color: Color(0xFFD3BFA8)),
               ),
-              const SizedBox(height: 28),
+              const SizedBox(height: 24),
 
               // Form Card
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
+                  color: const Color(0xFF07223A).withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: const Color(0xFF164E70).withOpacity(0.6)),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.06),
-                      blurRadius: 16,
-                      offset: const Offset(0, 4),
+                      color: Colors.black.withOpacity(0.4),
+                      blurRadius: 30,
+                      offset: const Offset(0, 12),
                     ),
                   ],
                 ),
@@ -114,25 +122,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   key: _formKey,
                   child: Column(
                     children: [
-                      // Username
                       TextFormField(
                         controller: _usernameCtrl,
+                        style: const TextStyle(color: Color(0xFFEAF6FF)),
                         decoration: const InputDecoration(
                           labelText: 'Username',
-                          prefixIcon: Icon(Icons.person_outline),
+                          prefixIcon: Icon(Icons.person_outline, color: Color(0xFF5AA3FF)),
                         ),
                         validator: (v) =>
-                        (v == null || v.isEmpty) ? 'Username is required' : null,
+                            (v == null || v.isEmpty) ? 'Username is required' : null,
                       ),
                       const SizedBox(height: 14),
 
-                      // Email
                       TextFormField(
                         controller: _emailCtrl,
                         keyboardType: TextInputType.emailAddress,
+                        style: const TextStyle(color: Color(0xFFEAF6FF)),
                         decoration: const InputDecoration(
                           labelText: 'Email Address',
-                          prefixIcon: Icon(Icons.email_outlined),
+                          prefixIcon: Icon(Icons.email_outlined, color: Color(0xFF5AA3FF)),
                         ),
                         validator: (v) {
                           if (v == null || v.isEmpty) return 'Email is required';
@@ -142,26 +150,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const SizedBox(height: 14),
 
-                      // NIC Number
                       TextFormField(
                         controller: _nicCtrl,
+                        style: const TextStyle(color: Color(0xFFEAF6FF)),
                         decoration: const InputDecoration(
                           labelText: 'NIC Number',
-                          prefixIcon: Icon(Icons.badge_outlined),
+                          prefixIcon: Icon(Icons.badge_outlined, color: Color(0xFF5AA3FF)),
                           hintText: 'e.g. 200012345678',
                         ),
                         validator: (v) =>
-                        (v == null || v.isEmpty) ? 'NIC number is required' : null,
+                            (v == null || v.isEmpty) ? 'NIC number is required' : null,
                       ),
                       const SizedBox(height: 14),
 
-                      // Phone
                       TextFormField(
                         controller: _phoneCtrl,
                         keyboardType: TextInputType.phone,
+                        style: const TextStyle(color: Color(0xFFEAF6FF)),
                         decoration: const InputDecoration(
                           labelText: 'Phone Number',
-                          prefixIcon: Icon(Icons.phone_outlined),
+                          prefixIcon: Icon(Icons.phone_outlined, color: Color(0xFF5AA3FF)),
                           hintText: '07X XXX XXXX',
                         ),
                         validator: (v) {
@@ -172,19 +180,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const SizedBox(height: 14),
 
-                      // Password
                       TextFormField(
                         controller: _passwordCtrl,
                         obscureText: _obscurePassword,
+                        style: const TextStyle(color: Color(0xFFEAF6FF)),
                         decoration: InputDecoration(
                           labelText: 'Password',
-                          prefixIcon: const Icon(Icons.lock_outline),
+                          prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF5AA3FF)),
                           suffixIcon: IconButton(
-                            icon: Icon(_obscurePassword
-                                ? Icons.visibility_off_outlined
-                                : Icons.visibility_outlined),
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_off_outlined
+                                  : Icons.visibility_outlined,
+                              color: const Color(0xFF5AA3FF),
+                            ),
                             onPressed: () => setState(
-                                    () => _obscurePassword = !_obscurePassword),
+                                () => _obscurePassword = !_obscurePassword),
                           ),
                         ),
                         validator: (v) {
@@ -195,19 +206,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const SizedBox(height: 14),
 
-                      // Confirm Password
                       TextFormField(
                         controller: _confirmCtrl,
                         obscureText: _obscureConfirm,
+                        style: const TextStyle(color: Color(0xFFEAF6FF)),
                         decoration: InputDecoration(
                           labelText: 'Confirm Password',
-                          prefixIcon: const Icon(Icons.lock_outline),
+                          prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF5AA3FF)),
                           suffixIcon: IconButton(
-                            icon: Icon(_obscureConfirm
-                                ? Icons.visibility_off_outlined
-                                : Icons.visibility_outlined),
+                            icon: Icon(
+                              _obscureConfirm
+                                  ? Icons.visibility_off_outlined
+                                  : Icons.visibility_outlined,
+                              color: const Color(0xFF5AA3FF),
+                            ),
                             onPressed: () => setState(
-                                    () => _obscureConfirm = !_obscureConfirm),
+                                () => _obscureConfirm = !_obscureConfirm),
                           ),
                         ),
                         validator: (v) {
@@ -216,26 +230,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           return null;
                         },
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 16),
 
-                      // Error
                       if (_errorMessage != null)
                         Container(
-                          padding: const EdgeInsets.all(10),
+                          padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.red.shade50,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.red.shade200),
+                            color: Colors.red.shade900.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.red.shade700.withOpacity(0.5)),
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.error_outline,
-                                  color: Colors.red.shade700, size: 18),
+                              const Icon(Icons.error_outline, color: Color(0xFFFF8A8A), size: 18),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(_errorMessage!,
-                                    style: TextStyle(
-                                        color: Colors.red.shade700,
+                                    style: const TextStyle(
+                                        color: Color(0xFFFF8A8A),
                                         fontSize: 13)),
                               ),
                             ],
@@ -244,20 +256,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                       const SizedBox(height: 20),
 
-                      // Register button
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _handleRegister,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF4AA3FF),
+                            foregroundColor: const Color(0xFF021022),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
                           child: _isLoading
                               ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                                color: Colors.white, strokeWidth: 2),
-                          )
-                              : const Text('Create Account',
-                              style: TextStyle(fontSize: 16)),
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                      color: Color(0xFF021022), strokeWidth: 2),
+                                )
+                              : const Text('Create Driver Account',
+                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                         ),
                       ),
                     ],
@@ -270,20 +289,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text('Already have an account? ',
-                      style: TextStyle(color: Colors.grey)),
+                      style: TextStyle(color: Color(0xFFAACDE9))),
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: const Text(
                       'Sign In',
                       style: TextStyle(
-                        color: Color(0xFF1A3A6B),
+                        color: Color(0xFF5AA3FF),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 30),
             ],
           ),
         ),

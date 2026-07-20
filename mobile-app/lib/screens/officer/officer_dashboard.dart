@@ -38,10 +38,8 @@ class OfficerDashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: const Color(0xFF021022),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -52,75 +50,75 @@ class OfficerDashboard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
+                  const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Welcome Back,",
-                        style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                        "OFFICER TERMINAL",
+                        style: TextStyle(color: Color(0xFFD7A46B), fontSize: 11, letterSpacing: 2, fontWeight: FontWeight.bold),
                       ),
-                      const Text(
-                        "Officer Terminal",
+                      SizedBox(height: 2),
+                      Text(
+                        "Police Dashboard",
                         style: TextStyle(
-                          fontSize: 28,
+                          fontSize: 26,
                           fontWeight: FontWeight.bold,
-                          letterSpacing: -0.5,
+                          color: Color(0xFFFFF6EA),
                         ),
                       ),
                     ],
                   ),
                   OutlinedButton.icon(
                     onPressed: () => _handleLogout(context),
-                    icon: const Icon(Icons.logout, size: 18),
-                    label: const Text('Log out'),
+                    icon: const Icon(Icons.logout, size: 18, color: Color(0xFFFF8A8A)),
+                    label: const Text('Log out', style: TextStyle(color: Color(0xFFFF8A8A))),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.red.shade600,
-                      side: BorderSide(color: Colors.red.shade200),
+                      side: const BorderSide(color: Color(0xFFFF8A8A)),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(14),
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 32),
-
-              // Overview Banner
-
+              const SizedBox(height: 28),
 
               // Overview Banner
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(22),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF1E3A8A), Color(0xFF3B82F6)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  color: const Color(0xFF072B46),
                   borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: const Color(0xFF4AA3FF).withOpacity(0.4)),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.blue.withOpacity(0.3),
-                      blurRadius: 12,
-                      offset: const Offset(0, 6),
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
                     )
                   ],
                 ),
                 child: const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "System Status",
-                      style: TextStyle(color: Colors.white70, fontSize: 14),
+                    Row(
+                      children: [
+                        Icon(Icons.shield, color: Color(0xFF4AA3FF), size: 20),
+                        SizedBox(width: 8),
+                        Text(
+                          "SYSTEM STATUS",
+                          style: TextStyle(color: Color(0xFF9FCAFF), fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1),
+                        ),
+                      ],
                     ),
-                    SizedBox(height: 4),
+                    SizedBox(height: 8),
                     Text(
-                      "All Systems Operational",
+                      "All Police Systems Operational",
                       style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
+                        color: Color(0xFFFFF6EA),
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -129,12 +127,12 @@ class OfficerDashboard extends StatelessWidget {
               ),
               const SizedBox(height: 32),
 
-              Text(
+              const Text(
                 "Quick Actions",
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.grey[800],
+                  color: Color(0xFFFFF6EA),
                 ),
               ),
               const SizedBox(height: 16),
@@ -150,9 +148,9 @@ class OfficerDashboard extends StatelessWidget {
                   _buildMenuCard(
                     context,
                     title: "Issue Fine",
-                    subtitle: "Create new citation",
+                    subtitle: "Create new traffic citation",
                     icon: Icons.add_moderator_rounded,
-                    color: Colors.green,
+                    color: const Color(0xFF1FC97A),
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(builder: (_) => const CreateFineScreen()),
@@ -161,9 +159,9 @@ class OfficerDashboard extends StatelessWidget {
                   _buildMenuCard(
                     context,
                     title: "Search Records",
-                    subtitle: "Look up existing fines",
+                    subtitle: "Look up driver fines",
                     icon: Icons.manage_search_rounded,
-                    color: Colors.orange,
+                    color: const Color(0xFF4AA3FF),
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(builder: (_) => const SearchFineScreen()),
@@ -192,14 +190,14 @@ class OfficerDashboard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: const Color(0xFF07223A),
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.grey[200]!),
+          border: Border.all(color: const Color(0xFF164E70)),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
             )
           ],
         ),
@@ -210,8 +208,9 @@ class OfficerDashboard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withOpacity(0.15),
                 shape: BoxShape.circle,
+                border: Border.all(color: color.withOpacity(0.4)),
               ),
               child: Icon(icon, color: color, size: 28),
             ),
@@ -223,12 +222,13 @@ class OfficerDashboard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
+                    color: Color(0xFFFFF6EA),
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                  style: const TextStyle(fontSize: 12, color: Color(0xFFAACDE9)),
                 ),
               ],
             )

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUserShield } from "react-icons/fa";
-import API from "../api/axiosInstance"; // Import our new client configuration
+import API from "../api/axiosInstance";
 
 function Login() {
   const navigate = useNavigate();
@@ -18,16 +18,13 @@ function Login() {
     setError("");
     setLoading(true);
 
-    // 1. CLEAR OLD EXPIRED TOKENS BEFORE MAKING THE CALL
     localStorage.removeItem("adminToken");
     localStorage.removeItem("adminLoggedIn");
 
     try {
-      // Connects directly to the user-auth backend controller route
       const response = await API.post("/auth/login", formData);
-      
+
       if (response.data && response.data.token) {
-        // Persist backend authorization state details across pages
         localStorage.setItem("adminToken", response.data.token);
         localStorage.setItem("adminLoggedIn", "true");
         navigate("/dashboard");
@@ -42,52 +39,49 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4"
-      style={{ background: "radial-gradient(ellipse at center, #0f2744 0%, #0a1628 100%)" }}>
-      <div className="w-full max-w-md rounded-2xl p-8"
-        style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", backdropFilter: "blur(10px)" }}>
+    <div className="min-h-screen flex items-center justify-center px-4 bg-[#021022]">
+      <div className="w-full max-w-md rounded-3xl p-8 bg-[#07223a]/90 border border-[#164e70] shadow-2xl shadow-black/50 backdrop-blur-xl">
 
-        <div className="text-center mb-6">
-          <div className="flex justify-center mb-5">
-            <div className="p-4 rounded-2xl" style={{ backgroundColor: "#1a3a5c" }}>
-              <FaUserShield className="text-blue-400 text-3xl" />
+        <div className="text-center mb-8">
+          <div className="flex justify-center mb-4">
+            <div className="p-4 rounded-2xl bg-[#072b46] border border-[#4aa3ff]/40 text-[#4aa3ff]">
+              <FaUserShield className="text-3xl" />
             </div>
           </div>
-          <p className="text-xs font-semibold tracking-widest mb-1" style={{ color: "#f0a500" }}>WELCOME BACK</p>
-          <h1 className="text-3xl font-bold text-white mb-2">Admin Portal</h1>
-          <p className="text-sm" style={{ color: "#8baabf" }}>Traffic Fine Payment System</p>
+          <p className="text-xs font-semibold tracking-widest text-[#d7a46b] mb-1">WELCOME BACK</p>
+          <h1 className="text-3xl font-bold text-[#fff6ea] tracking-wide mb-1">Admin Portal</h1>
+          <p className="text-sm text-[#aacde9]">Traffic Fine Management System</p>
         </div>
 
         {error && (
-          <div className="text-red-400 text-sm text-center p-3 rounded-lg mb-4"
-            style={{ backgroundColor: "rgba(255,80,80,0.1)", border: "1px solid rgba(255,80,80,0.2)" }}>
+          <div className="text-[#ff8a8a] text-sm text-center p-3 rounded-xl mb-5 bg-red-950/40 border border-red-800/50">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form onSubmit={handleLogin} className="space-y-5">
           <div>
+            <label className="block text-xs font-semibold text-[#9fcaff] mb-1.5">Username</label>
             <input
               type="text"
               name="username"
               value={formData.username}
               onChange={handleChange}
-              placeholder="Username"
-              className="w-full px-4 py-3 rounded-xl text-white outline-none placeholder-gray-400"
-              style={{ backgroundColor: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)" }}
+              placeholder="Enter admin username"
+              className="w-full px-4 py-3 rounded-xl text-[#eaf6ff] bg-[#06223b] border border-[#214f73] focus:border-[#5aa3ff] outline-none placeholder-[#aacde9]/50 transition-all duration-200"
               required
             />
           </div>
 
           <div>
+            <label className="block text-xs font-semibold text-[#9fcaff] mb-1.5">Password</label>
             <input
               type="password"
               name="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="Password"
-              className="w-full px-4 py-3 rounded-xl text-white outline-none placeholder-gray-400"
-              style={{ backgroundColor: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)" }}
+              placeholder="Enter password"
+              className="w-full px-4 py-3 rounded-xl text-[#eaf6ff] bg-[#06223b] border border-[#214f73] focus:border-[#5aa3ff] outline-none placeholder-[#aacde9]/50 transition-all duration-200"
               required
             />
           </div>
@@ -95,9 +89,8 @@ function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-xl font-semibold text-white transition-all duration-200 hover:brightness-110 flex items-center justify-center gap-2"
-            style={{ backgroundColor: loading ? "#6b7280" : "#3b82f6" }}>
-            {loading ? "Authenticating..." : "Login →"}
+            className="w-full py-3.5 rounded-xl font-bold text-[#021022] bg-[#4aa3ff] hover:bg-[#5aa3ff] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-[#4aa3ff]/20 mt-2">
+            {loading ? "Authenticating..." : "Sign In to Dashboard →"}
           </button>
         </form>
       </div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import API from "../api/axiosInstance";
+import { FaUserPlus, FaTimes, FaUserShield } from "react-icons/fa";
 
 function ManageOfficers() {
   const [officers, setOfficers] = useState([]);
@@ -20,11 +21,10 @@ function ManageOfficers() {
 
   const fetchOfficers = async () => {
     try {
-      // Calls UserController's @GetMapping("/officers") endpoint
       const response = await API.get("/api/users/officers");
       setOfficers(response.data);
     } catch (error) {
-      console.error("Could not trace registration lists", error);
+      console.error("Could not fetch officers list", error);
     }
   };
 
@@ -35,60 +35,72 @@ function ManageOfficers() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Connects with AdminController's @PostMapping("/register-officer") route
       await API.post("/api/admin/register-officer", {
         username: formData.username,
         email: formData.email,
         password: formData.password,
-        role: "OFFICER", // Enforces backend Enum match constraint
+        role: "OFFICER",
         nicNumber: formData.nicNumber,
         phoneNumber: formData.phoneNumber
       });
 
       setFormData({ username: "", email: "", password: "", nicNumber: "", phoneNumber: "" });
       setShowForm(false);
-      fetchOfficers(); // Refresh view
+      fetchOfficers();
     } catch (error) {
       alert("Registration failed: " + (error.response?.data || error.message));
     }
   };
 
   return (
-    <div className="flex">
+    <div className="flex min-h-screen" style={{ backgroundColor: "#021022", color: "#eaf6ff" }}>
       <Sidebar />
-      <div className="flex-1 bg-slate-100 min-h-screen p-6">
-        <Header title="Manage Officers" />
+      <div className="flex-1 p-6" style={{ backgroundColor: "#021022", minHeight: "100vh" }}>
+        <Header title="Manage Officers" subtitle="Register and manage police traffic officer accounts" />
         
         <div className="mt-6 flex justify-end">
-          <button onClick={() => setShowForm(true)} className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700">
-            + Add Officer
+          <button
+            onClick={() => setShowForm(true)}
+            className="font-bold px-5 py-3 rounded-xl shadow-lg flex items-center gap-2 cursor-pointer transition-all duration-200 hover:brightness-110"
+            style={{ backgroundColor: "#4aa3ff", color: "#021022" }}
+          >
+            <FaUserPlus /> Register New Officer
           </button>
         </div>
 
-        <div className="mt-6 bg-white rounded-xl shadow overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-slate-800 text-white">
+        {/* Table Container - Driver Web Dark Theme */}
+        <div className="mt-6 rounded-3xl overflow-hidden border shadow-2xl" style={{ backgroundColor: "#062033", borderColor: "rgba(31, 79, 120, 0.6)" }}>
+          <table className="w-full text-left border-collapse" style={{ backgroundColor: "#062033" }}>
+            <thead style={{ backgroundColor: "#07233f", color: "#eaf6ff" }}>
               <tr>
-                <th className="p-3 text-left">ID</th>
-                <th className="p-3 text-left">Username</th>
-                <th className="p-3 text-left">Email</th>
-                <th className="p-3 text-left">NIC</th>
-                <th className="p-3 text-left">Phone</th>
+                <th className="p-4 font-bold text-xs uppercase tracking-wider" style={{ color: "#9fcfff" }}>ID</th>
+                <th className="p-4 font-bold text-xs uppercase tracking-wider" style={{ color: "#9fcfff" }}>Officer Username</th>
+                <th className="p-4 font-bold text-xs uppercase tracking-wider" style={{ color: "#9fcfff" }}>Email Address</th>
+                <th className="p-4 font-bold text-xs uppercase tracking-wider" style={{ color: "#9fcfff" }}>NIC Number</th>
+                <th className="p-4 font-bold text-xs uppercase tracking-wider" style={{ color: "#9fcfff" }}>Phone Number</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="text-sm" style={{ backgroundColor: "#062033" }}>
               {officers.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="p-3 text-center text-gray-500">No active traffic officers found.</td>
+                  <td colSpan="5" className="p-8 text-center font-medium" style={{ color: "#aacde9", backgroundColor: "#062033" }}>
+                    No active traffic officers registered yet.
+                  </td>
                 </tr>
               ) : (
-                officers.map((officer) => (
-                  <tr key={officer.id} className="border-b hover:bg-slate-50">
-                    <td className="p-3">{officer.id}</td>
-                    <td className="p-3 font-semibold text-slate-700">{officer.username}</td>
-                    <td className="p-3">{officer.email}</td>
-                    <td className="p-3">{officer.nicNumber}</td>
-                    <td className="p-3">{officer.phoneNumber}</td>
+                officers.map((officer, index) => (
+                  <tr
+                    key={officer.id}
+                    style={{
+                      backgroundColor: index % 2 === 0 ? "#071d31" : "#062033",
+                      borderBottom: "1px solid rgba(31, 79, 120, 0.4)"
+                    }}
+                  >
+                    <td className="p-4 font-mono font-bold" style={{ color: "#aacde9" }}>#{officer.id}</td>
+                    <td className="p-4 font-bold text-base" style={{ color: "#eaf6ff" }}>{officer.username}</td>
+                    <td className="p-4 font-medium" style={{ color: "#4aa3ff" }}>{officer.email}</td>
+                    <td className="p-4 font-mono font-bold" style={{ color: "#d7a46b" }}>{officer.nicNumber}</td>
+                    <td className="p-4 font-medium" style={{ color: "#eaf6ff" }}>{officer.phoneNumber}</td>
                   </tr>
                 ))
               )}
@@ -96,20 +108,99 @@ function ManageOfficers() {
           </table>
         </div>
 
+        {/* Modal Form */}
         {showForm && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-            <div className="bg-white w-full max-w-md rounded-xl p-6">
-              <h2 className="text-2xl font-bold mb-5">Add New Officer</h2>
+          <div className="fixed inset-0 flex items-center justify-center p-4 z-50" style={{ backgroundColor: "rgba(0,0,0,0.85)", backdropFilter: "blur(6px)" }}>
+            <div className="w-full max-w-md rounded-3xl p-6 shadow-2xl border" style={{ backgroundColor: "#07223a", borderColor: "#164e70", color: "#eaf6ff" }}>
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-[#072b46] text-[#4aa3ff] border border-[#4aa3ff]/30">
+                    <FaUserShield />
+                  </div>
+                  <h2 className="text-xl font-bold" style={{ color: "#eaf6ff" }}>Register Traffic Officer</h2>
+                </div>
+                <button onClick={() => setShowForm(false)} style={{ color: "#aacde9" }} className="text-lg hover:text-red-400">
+                  <FaTimes />
+                </button>
+              </div>
               <form onSubmit={handleSubmit} className="space-y-4">
-                <input type="text" name="username" placeholder="Username" value={formData.username} onChange={handleChange} required className="w-full border p-3 rounded-lg" />
-                <input type="email" name="email" placeholder="Email Address" value={formData.email} onChange={handleChange} required className="w-full border p-3 rounded-lg" />
-                <input type="password" name="password" placeholder="System Password" value={formData.password} onChange={handleChange} required className="w-full border p-3 rounded-lg" />
-                <input type="text" name="nicNumber" placeholder="NIC Number" value={formData.nicNumber} onChange={handleChange} required className="w-full border p-3 rounded-lg" />
-                <input type="text" name="phoneNumber" placeholder="Phone Number" value={formData.phoneNumber} onChange={handleChange} required className="w-full border p-3 rounded-lg" />
+                <div>
+                  <label className="block text-xs font-semibold mb-1" style={{ color: "#9fcfff" }}>Username (e.g. officer_101)</label>
+                  <input
+                    type="text"
+                    name="username"
+                    placeholder="officer_xxx"
+                    value={formData.username}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 rounded-xl outline-none border"
+                    style={{ backgroundColor: "#06223b", borderColor: "#214f73", color: "#eaf6ff" }}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold mb-1" style={{ color: "#9fcfff" }}>Email Address</label>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="officer@police.lk"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 rounded-xl outline-none border"
+                    style={{ backgroundColor: "#06223b", borderColor: "#214f73", color: "#eaf6ff" }}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold mb-1" style={{ color: "#9fcfff" }}>Temporary Password</label>
+                  <input
+                    type="password"
+                    name="password"
+                    placeholder="Minimum 6 characters"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 rounded-xl outline-none border"
+                    style={{ backgroundColor: "#06223b", borderColor: "#214f73", color: "#eaf6ff" }}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold mb-1" style={{ color: "#9fcfff" }}>NIC Number</label>
+                  <input
+                    type="text"
+                    name="nicNumber"
+                    placeholder="e.g. 199012345678"
+                    value={formData.nicNumber}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 rounded-xl outline-none border"
+                    style={{ backgroundColor: "#06223b", borderColor: "#214f73", color: "#eaf6ff" }}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold mb-1" style={{ color: "#9fcfff" }}>Phone Number</label>
+                  <input
+                    type="text"
+                    name="phoneNumber"
+                    placeholder="e.g. 0771234567"
+                    value={formData.phoneNumber}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 rounded-xl outline-none border"
+                    style={{ backgroundColor: "#06223b", borderColor: "#214f73", color: "#eaf6ff" }}
+                  />
+                </div>
                 
-                <div className="flex justify-end gap-3 mt-4">
-                  <button type="button" onClick={() => setShowForm(false)} className="bg-gray-500 text-white px-5 py-2 rounded-lg">Cancel</button>
-                  <button type="submit" className="bg-blue-600 text-white px-5 py-2 rounded-lg">Save Officer</button>
+                <div className="flex justify-end gap-3 pt-2">
+                  <button type="button" onClick={() => setShowForm(false)} className="px-5 py-2.5 rounded-xl border font-semibold" style={{ backgroundColor: "#062033", borderColor: "#164e70", color: "#aacde9" }}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="px-5 py-2.5 font-bold rounded-xl shadow-lg" style={{ backgroundColor: "#4aa3ff", color: "#021022" }}>
+                    Save Officer
+                  </button>
                 </div>
               </form>
             </div>
