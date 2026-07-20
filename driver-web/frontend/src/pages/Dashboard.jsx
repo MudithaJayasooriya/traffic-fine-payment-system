@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import Navbar from "../components/Navbar";
-import { FaCheckCircle, FaClock, FaFileAlt, FaSearchLocation } from "react-icons/fa";
+import { FaCheckCircle, FaClock, FaFileAlt, FaSearchLocation, FaChevronRight } from "react-icons/fa";
 import { parseJwt } from "../utils/jwtHelper";
 
 function Dashboard() {
@@ -142,12 +143,13 @@ function Dashboard() {
                 </div>
               ) : (
                 fines.map((fine) => (
-                  <div
+                  <Link
                     key={fine.id}
-                    className="flex flex-col gap-3 rounded-2xl border border-[#113a5a]/60 bg-[#062033]/90 p-4 shadow-md transition duration-200 hover:border-[#59a6ff] hover:bg-[#072a3d] md:flex-row md:items-center md:justify-between"
+                    to={`/fine/${fine.referenceNumber}`}
+                    className="flex flex-col gap-3 rounded-2xl border border-[#113a5a]/60 bg-[#062033]/90 p-4 shadow-md transition-all duration-200 hover:border-[#59a6ff] hover:bg-[#072a3d] hover:shadow-[0_8px_24px_rgba(74,163,255,0.15)] md:flex-row md:items-center md:justify-between cursor-pointer group"
                   >
                     <div>
-                      <p className="flex items-center gap-2 text-sm font-bold text-[#eaf6ff]">
+                      <p className="flex items-center gap-2 text-sm font-bold text-[#eaf6ff] group-hover:text-[#59a6ff] transition-colors">
                         <FaFileAlt className="text-[#59a6ff]" />
                         {fine.referenceNumber}
                       </p>
@@ -161,7 +163,7 @@ function Dashboard() {
                       </p>
                     </div>
 
-                    <div>
+                    <div className="flex items-center gap-3">
                       <span
                         className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
                           fine.status === "Paid"
@@ -171,8 +173,9 @@ function Dashboard() {
                       >
                         {fine.status}
                       </span>
+                      <FaChevronRight className="text-xs text-[#59a6ff] opacity-70 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
                     </div>
-                  </div>
+                  </Link>
                 ))
               )}
             </div>

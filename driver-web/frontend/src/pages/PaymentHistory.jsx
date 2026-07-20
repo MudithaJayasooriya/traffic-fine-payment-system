@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Navbar from "../components/Navbar";
-import { FaFileInvoiceDollar } from "react-icons/fa";
+import { FaFileInvoiceDollar, FaChevronRight } from "react-icons/fa";
 import { parseJwt } from "../utils/jwtHelper";
 
 function PaymentHistory() {
+  const navigate = useNavigate();
   const [paidFines, setPaidFines] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -94,14 +96,21 @@ function PaymentHistory() {
                     </tr>
                   ) : (
                     paidFines.map((fine, index) => (
-                      <tr key={fine.id} className={index % 2 === 0 ? "bg-[#071d31]" : "bg-[#062033]"}>
-                        <td className="p-3 font-mono font-bold text-[#4aa3ff]">{fine.referenceNumber}</td>
+                      <tr
+                        key={fine.id}
+                        onClick={() => navigate(`/fine/${fine.referenceNumber}`)}
+                        className={`cursor-pointer transition-colors hover:bg-[#072a3d] ${
+                          index % 2 === 0 ? "bg-[#071d31]" : "bg-[#062033]"
+                        }`}
+                      >
+                        <td className="p-3 font-mono font-bold text-[#4aa3ff] hover:underline">{fine.referenceNumber}</td>
                         <td className="p-3 font-semibold text-[#eaf6ff]">{fine.category}</td>
                         <td className="p-3 font-bold text-[#1fc97a]">LKR {fine.amount.toLocaleString()}</td>
-                        <td className="p-3">
+                        <td className="p-3 flex items-center justify-between">
                           <span className="inline-flex rounded-full bg-[#1fc97a] px-2.5 py-0.5 text-[11px] font-bold text-[#021022]">
                             Paid
                           </span>
+                          <FaChevronRight className="text-[10px] text-[#59a6ff] opacity-60" />
                         </td>
                       </tr>
                     ))
