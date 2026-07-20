@@ -9,6 +9,7 @@ import 'screens/officer/officer_dashboard.dart';
 import 'screens/officer/officer_home_screen.dart';
 import 'screens/officer/categories_screen.dart';
 import 'screens/officer/issued_fines_screen.dart';
+import 'screens/profile_screen.dart';
 import 'core/constants.dart';
 
 void main() async {
@@ -112,6 +113,7 @@ class MyApp extends StatelessWidget {
         '/officer-home': (_) => const OfficerHomeScreen(),
         '/categories': (_) => const CategoriesScreen(),
         '/issued-fines': (_) => const IssuedFinesScreen(),
+        '/profile': (_) => const ProfileScreen(),
       },
     );
   }

@@ -83,6 +83,13 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
           title: const Text('Driver Fines Portal', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFFFF6EA))),
           actions: [
             IconButton(
+              icon: const Icon(Icons.person, color: Color(0xFF4AA3FF)),
+              tooltip: 'My Profile',
+              onPressed: () {
+                Navigator.pushNamed(context, '/profile');
+              },
+            ),
+            IconButton(
               icon: const Icon(Icons.refresh, color: Color(0xFF9FCAFF)),
               tooltip: 'Refresh',
               onPressed: _loadFines,

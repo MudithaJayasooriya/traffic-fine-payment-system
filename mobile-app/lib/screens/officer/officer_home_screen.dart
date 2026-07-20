@@ -4,6 +4,7 @@ import 'issued_fines_screen.dart';
 import 'categories_screen.dart';
 import 'search_fine.dart';
 import 'create_fine.dart';
+import '../profile_screen.dart';
 
 class OfficerHomeScreen extends StatefulWidget {
   const OfficerHomeScreen({super.key});
@@ -20,6 +21,7 @@ class _OfficerHomeScreenState extends State<OfficerHomeScreen> {
     IssuedFinesScreen(),
     CategoriesScreen(),
     SearchFineScreen(),
+    ProfileScreen(),
   ];
 
   @override
@@ -60,8 +62,8 @@ class _OfficerHomeScreenState extends State<OfficerHomeScreen> {
           backgroundColor: const Color(0xFF07223A),
           selectedItemColor: const Color(0xFF4AA3FF),
           unselectedItemColor: const Color(0xFFAACDE9),
-          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-          unselectedLabelStyle: const TextStyle(fontSize: 11),
+          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+          unselectedLabelStyle: const TextStyle(fontSize: 10),
           type: BottomNavigationBarType.fixed,
           elevation: 8,
           items: const [
@@ -71,7 +73,7 @@ class _OfficerHomeScreenState extends State<OfficerHomeScreen> {
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.assignment_rounded),
-              label: 'Issued Fines',
+              label: 'Issued',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.list_alt_rounded),
@@ -80,6 +82,10 @@ class _OfficerHomeScreenState extends State<OfficerHomeScreen> {
             BottomNavigationBarItem(
               icon: Icon(Icons.search_rounded),
               label: 'Search',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_rounded),
+              label: 'Profile',
             ),
           ],
         ),
