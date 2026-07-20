@@ -1,17 +1,34 @@
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
 import { FaCreditCard, FaLock, FaArrowRight } from "react-icons/fa";
 import Navbar from "../components/Navbar";
 
 function Payment() {
-
   const navigate = useNavigate();
+  const { fineId } = useParams(); // fineId contains the referenceNumber
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const { fineId } = useParams();
-
-  const handlePayment = (e) => {
+  const handlePayment = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
 
-    navigate(`/receipt/${fineId}`);
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put(`http://localhost:8080/api/fines/${fineId}/mark-paid`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      navigate(`/receipt/${fineId}`);
+    } catch (err) {
+      console.error("Error processing payment:", err);
+      setError("Payment processing failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -36,14 +53,18 @@ function Payment() {
             Enter your card details to complete payment for fine #{fineId}.
           </p>
 
+          {error && <p className="mt-4 text-sm text-red-400 text-center">{error}</p>}
+
           <div className="mt-8 space-y-4">
             <input
+              required
               type="text"
               placeholder="Card Holder Name"
               className="w-full rounded-2xl border border-[#214f73] bg-[#06223b] px-4 py-3 text-[#eaf6ff] outline-none transition placeholder:text-[#aacde9] focus:border-[#5aa3ff] focus:ring-2 focus:ring-[#5aa3ff]/25"
             />
 
             <input
+              required
               type="text"
               placeholder="Card Number"
               className="w-full rounded-2xl border border-[#214f73] bg-[#06223b] px-4 py-3 text-[#eaf6ff] outline-none transition placeholder:text-[#aacde9] focus:border-[#5aa3ff] focus:ring-2 focus:ring-[#5aa3ff]/25"
@@ -51,12 +72,14 @@ function Payment() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <input
+                required
                 type="text"
                 placeholder="MM/YY"
                 className="w-full rounded-2xl border border-[#214f73] bg-[#06223b] px-4 py-3 text-[#eaf6ff] outline-none transition placeholder:text-[#aacde9] focus:border-[#5aa3ff] focus:ring-2 focus:ring-[#5aa3ff]/25"
               />
 
               <input
+                required
                 type="password"
                 placeholder="CVV"
                 className="w-full rounded-2xl border border-[#214f73] bg-[#06223b] px-4 py-3 text-[#eaf6ff] outline-none transition placeholder:text-[#aacde9] focus:border-[#5aa3ff] focus:ring-2 focus:ring-[#5aa3ff]/25"
@@ -65,10 +88,11 @@ function Payment() {
           </div>
 
           <button
+            disabled={loading}
             className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[#2b6fb0]/40 bg-[#4aa3ff] px-6 py-3 font-bold text-[#021022] shadow-[0_16px_30px_rgba(74,163,255,0.18)] transition duration-200 hover:-translate-y-0.5 hover:bg-[#66b8ff]"
           >
             <FaLock className="text-xs" />
-            Pay Fine
+            {loading ? "Processing..." : "Pay Fine"}
             <FaArrowRight className="text-xs" />
           </button>
         </form>

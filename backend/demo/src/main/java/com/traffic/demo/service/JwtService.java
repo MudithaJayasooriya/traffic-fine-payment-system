@@ -39,6 +39,12 @@ public class JwtService {
         // to a forced password-reset screen (used for officer accounts).
         claims.put("mustChangePassword", user.isMustChangePassword());
 
+        // Extra details for the frontend profile and client integrations
+        claims.put("id", user.getId());
+        claims.put("email", user.getEmail());
+        claims.put("nicNumber", user.getNicNumber());
+        claims.put("phoneNumber", user.getPhoneNumber());
+
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(user.getUsername())

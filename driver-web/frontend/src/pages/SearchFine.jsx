@@ -1,6 +1,6 @@
 import { useState } from "react";
+import axios from "axios";
 import Navbar from "../components/Navbar";
-import { fines } from "../data/mockFines";
 import { FaSearch, FaMapMarkerAlt, FaMoneyBillWave } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
@@ -8,15 +8,39 @@ function SearchFine() {
   const [reference, setReference] = useState("");
   const [result, setResult] = useState(null);
   const [searched, setSearched] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSearch = () => {
-    const found = fines.find(
-      (fine) =>
-        fine.referenceNumber.toLowerCase() === reference.toLowerCase()
-    );
+  const handleSearch = async () => {
+    if (!reference.trim()) return;
+    setLoading(true);
+    setSearched(false);
+    setResult(null);
 
-    setResult(found || null);
-    setSearched(true);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(`http://localhost:8080/api/fines/${reference}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      const fine = response.data;
+      setResult({
+        id: fine.id,
+        referenceNumber: fine.referenceNumber,
+        category: fine.categoryName || fine.categoryCode,
+        amount: fine.amount,
+        location: "Colombo",
+        date: fine.fineDate,
+        status: fine.status === "PAID" ? "Paid" : "Pending"
+      });
+    } catch (err) {
+      console.error("Error searching fine:", err);
+      setResult(null);
+    } finally {
+      setLoading(false);
+      setSearched(true);
+    }
   };
 
   return (
@@ -49,10 +73,11 @@ function SearchFine() {
 
             <button
               onClick={handleSearch}
+              disabled={loading}
               className="group inline-flex items-center justify-center gap-2 rounded-2xl border border-[#2b6fb0]/40 bg-[#4aa3ff] px-6 py-3 font-bold text-[#021022] shadow-[0_16px_30px_rgba(74,163,255,0.18)] transition duration-200 hover:-translate-y-0.5 hover:bg-[#66b8ff]"
             >
               <FaSearch className="text-sm transition-transform duration-200 group-hover:scale-110" />
-              Search
+              {loading ? "Searching..." : "Search"}
             </button>
           </div>
 
@@ -108,7 +133,7 @@ function SearchFine() {
 
               <div className="mt-6 flex justify-end">
                 <Link
-                  to={`/fine/${result.id}`}
+                  to={`/fine/${result.referenceNumber}`}
                   className="inline-flex items-center gap-2 rounded-2xl border border-green-500/30 bg-green-500 px-5 py-3 font-semibold text-white shadow-lg transition duration-200 hover:-translate-y-0.5 hover:bg-green-600"
                 >
                   View Details
@@ -133,6 +158,5 @@ function SearchFine() {
     </div>
   );
 }
-
 
 export default SearchFine;

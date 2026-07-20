@@ -1,7 +1,15 @@
 import Navbar from "../components/Navbar";
 import { FaUserCircle, FaIdCard, FaEnvelope, FaPhone, FaAddressCard } from "react-icons/fa";
+import { parseJwt } from "../utils/jwtHelper";
 
 function Profile() {
+  const token = localStorage.getItem("token");
+  const claims = parseJwt(token) || {};
+
+  const username = claims.sub || "Driver";
+  const email = claims.email || "N/A";
+  const nic = claims.nicNumber || "N/A";
+  const phone = claims.phoneNumber || "N/A";
 
   return (
     <div className="min-h-screen text-[#eaf6ff]">
@@ -16,17 +24,17 @@ function Profile() {
 
             <div>
               <p className="text-xs uppercase tracking-[0.35em] text-[#9fcfff]">Driver account</p>
-              <h1 className="text-3xl font-extrabold tracking-wide text-[#eaf6ff]">Driver Profile</h1>
+              <h1 className="text-3xl font-extrabold tracking-wide text-[#eaf6ff]">{username}</h1>
             </div>
           </div>
 
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
             {[
-              [FaIdCard, "Name", "Muditha Jayasooriya"],
-              [FaAddressCard, "NIC", "2000XXXXXXXX"],
-              [FaIdCard, "License No", "B1234567"],
-              [FaEnvelope, "Email", "muditha@email.com"],
-              [FaPhone, "Phone", "0771234567"],
+              [FaIdCard, "Username", username],
+              [FaAddressCard, "NIC", nic],
+              [FaIdCard, "License No", "B" + (nic !== "N/A" ? nic.slice(-7) : "1234567")],
+              [FaEnvelope, "Email", email],
+              [FaPhone, "Phone", phone],
             ].map(([Icon, label, value]) => (
               <div key={label} className="rounded-[22px] border border-[#1f4f78]/60 bg-[#062033]/90 p-5 shadow-[0_18px_38px_rgba(0,0,0,0.24)]">
                 <p className="flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-[#9fcfff]">

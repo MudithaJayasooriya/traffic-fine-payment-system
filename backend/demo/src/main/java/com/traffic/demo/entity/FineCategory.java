@@ -27,5 +27,6 @@ public class FineCategory {
     @Column(nullable = false)
     private Double defaultAmount;
 
+    @Builder.Default
     private Boolean active = true;
 }
