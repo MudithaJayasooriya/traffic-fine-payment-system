@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:dropdown_search/dropdown_search.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
+import '../../services/api_service.dart';
 import '../../services/fine_service.dart';
 import 'officer_dashboard.dart';
 
@@ -20,18 +21,17 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
   // SELECTED
   Map<String, dynamic>? selectedCategoryObj;
   Map<String, dynamic>? selectedDriverObj;
-  Map<String, dynamic>? selectedOfficerObj;
 
   String? selectedCategory;
   String? selectedDriver;
 
-  // Officer ID input
-  final TextEditingController officerIdController = TextEditingController();
+  // Officer Info (Locked)
+  int? loggedInOfficerId;
+  String? loggedInOfficerUsername;
+  bool _isLoadingOfficer = true;
 
   String result = "";
   bool isSuccess = false;
-
-  // UI State Tracking
   bool isCreated = false;
   String referenceNumber = "";
 
@@ -39,9 +39,31 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
   void initState() {
     super.initState();
     loadInitialData();
+    _loadLoggedInOfficer();
   }
 
-  // LOAD DATA
+  Future<void> _loadLoggedInOfficer() async {
+    final token = await ApiService.getToken();
+    if (token != null) {
+      try {
+        final decoded = JwtDecoder.decode(token);
+        final id = decoded['id'] ?? decoded['userId'];
+        final username = decoded['sub'] ?? decoded['username'] ?? 'Officer';
+
+        setState(() {
+          loggedInOfficerId = id;
+          loggedInOfficerUsername = username;
+          _isLoadingOfficer = false;
+        });
+      } catch (e) {
+        print("Error decoding officer token: $e");
+        setState(() => _isLoadingOfficer = false);
+      }
+    } else {
+      setState(() => _isLoadingOfficer = false);
+    }
+  }
+
   void loadInitialData() async {
     final c = await service.getAllCategories();
     final d = await service.getAllDrivers();
@@ -52,24 +74,11 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
     });
   }
 
-  // OFFICER AUTO FETCH
-  void fetchOfficerById(String id) async {
-    if (id.isEmpty) return;
-
-    final officer = await service.getUserById(int.parse(id));
-
-    setState(() {
-      selectedOfficerObj = officer;
-    });
-  }
-
   // CREATE FINE
   void createFine() async {
-    if (selectedCategory == null ||
-        officerIdController.text.isEmpty ||
-        selectedDriver == null) {
+    if (selectedCategory == null || loggedInOfficerId == null || selectedDriver == null) {
       setState(() {
-        result = "Please fill all fields";
+        result = "Please select a Category and Offending Driver";
         isSuccess = false;
       });
       return;
@@ -77,7 +86,7 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
 
     final fine = await service.createFine(
       selectedCategory!,
-      int.parse(officerIdController.text),
+      loggedInOfficerId!,
       int.parse(selectedDriver!),
     );
 
@@ -86,7 +95,7 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
         result = "Fine Created Successfully";
         referenceNumber = fine.referenceNumber ?? "N/A";
         isSuccess = true;
-        isCreated = true; // Flips UI to the Success View
+        isCreated = true;
       } else {
         result = "Failed to create fine";
         isSuccess = false;
@@ -95,14 +104,249 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
     });
   }
 
+  // SEARCHABLE CATEGORY MODAL PICKER
+  void _openCategoryPicker() {
+    String query = "";
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFF07223A),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            final filtered = categories.where((cat) {
+              final code = (cat['categoryCode'] ?? '').toString().toLowerCase();
+              final name = (cat['categoryName'] ?? '').toString().toLowerCase();
+              final q = query.toLowerCase();
+              return code.contains(q) || name.contains(q);
+            }).toList();
+
+            return Container(
+              height: MediaQuery.of(context).size.height * 0.75,
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Select Violation Category",
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFFFFF6EA)),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, color: Color(0xFFAACDE9)),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Search Bar inside Modal
+                  TextField(
+                    autofocus: true,
+                    style: const TextStyle(color: Color(0xFFEAF6FF), fontSize: 14),
+                    decoration: InputDecoration(
+                      hintText: "Search by Code (e.g. SPD01) or Name...",
+                      hintStyle: const TextStyle(color: Color(0xFF5AA3FF), fontSize: 13),
+                      prefixIcon: const Icon(Icons.search, color: Color(0xFF4AA3FF)),
+                      filled: true,
+                      fillColor: const Color(0xFF06223B),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: const BorderSide(color: Color(0xFF214F73)),
+                      ),
+                    ),
+                    onChanged: (v) => setModalState(() => query = v),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  Expanded(
+                    child: filtered.isEmpty
+                        ? const Center(
+                            child: Text("No matching categories found.",
+                                style: TextStyle(color: Color(0xFFAACDE9))),
+                          )
+                        : ListView.separated(
+                            itemCount: filtered.length,
+                            separatorBuilder: (_, __) => const Divider(
+                                color: Color(0xFF1F4F78), height: 1),
+                            itemBuilder: (context, index) {
+                              final cat = filtered[index];
+                              final code = cat['categoryCode'] ?? '';
+                              final name = cat['categoryName'] ?? '';
+                              final amount = cat['defaultAmount'] ?? 0;
+
+                              return ListTile(
+                                contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 6, horizontal: 8),
+                                title: Text(
+                                  name,
+                                  style: const TextStyle(
+                                      color: Color(0xFFFFF6EA),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14),
+                                ),
+                                subtitle: Text(
+                                  "Code: $code | LKR ${amount.toString()}",
+                                  style: const TextStyle(
+                                      color: Color(0xFF4AA3FF), fontSize: 12),
+                                ),
+                                trailing: const Icon(Icons.chevron_right,
+                                    color: Color(0xFF5AA3FF)),
+                                onTap: () {
+                                  setState(() {
+                                    selectedCategoryObj = cat;
+                                    selectedCategory = code;
+                                  });
+                                  Navigator.pop(context);
+                                },
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // SEARCHABLE DRIVER MODAL PICKER
+  void _openDriverPicker() {
+    String query = "";
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFF07223A),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            final filtered = drivers.where((d) {
+              final id = (d['id'] ?? '').toString().toLowerCase();
+              final username = (d['username'] ?? '').toString().toLowerCase();
+              final nic = (d['nicNumber'] ?? '').toString().toLowerCase();
+              final q = query.toLowerCase();
+              return id.contains(q) || username.contains(q) || nic.contains(q);
+            }).toList();
+
+            return Container(
+              height: MediaQuery.of(context).size.height * 0.75,
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Select Offending Driver",
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFFFFF6EA)),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, color: Color(0xFFAACDE9)),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Search Bar inside Modal
+                  TextField(
+                    autofocus: true,
+                    style: const TextStyle(color: Color(0xFFEAF6FF), fontSize: 14),
+                    decoration: InputDecoration(
+                      hintText: "Search by Driver ID, Username, or NIC...",
+                      hintStyle: const TextStyle(color: Color(0xFF5AA3FF), fontSize: 13),
+                      prefixIcon: const Icon(Icons.search, color: Color(0xFF4AA3FF)),
+                      filled: true,
+                      fillColor: const Color(0xFF06223B),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: const BorderSide(color: Color(0xFF214F73)),
+                      ),
+                    ),
+                    onChanged: (v) => setModalState(() => query = v),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  Expanded(
+                    child: filtered.isEmpty
+                        ? const Center(
+                            child: Text("No matching drivers found.",
+                                style: TextStyle(color: Color(0xFFAACDE9))),
+                          )
+                        : ListView.separated(
+                            itemCount: filtered.length,
+                            separatorBuilder: (_, __) => const Divider(
+                                color: Color(0xFF1F4F78), height: 1),
+                            itemBuilder: (context, index) {
+                              final driver = filtered[index];
+                              final id = driver['id']?.toString() ?? '';
+                              final username = driver['username'] ?? '';
+                              final nic = driver['nicNumber'] ?? 'N/A';
+
+                              return ListTile(
+                                contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 6, horizontal: 8),
+                                title: Text(
+                                  "Driver: $username",
+                                  style: const TextStyle(
+                                      color: Color(0xFFFFF6EA),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14),
+                                ),
+                                subtitle: Text(
+                                  "ID: #$id | NIC: $nic",
+                                  style: const TextStyle(
+                                      color: Color(0xFF4AA3FF), fontSize: 12),
+                                ),
+                                trailing: const Icon(Icons.chevron_right,
+                                    color: Color(0xFF5AA3FF)),
+                                onTap: () {
+                                  setState(() {
+                                    selectedDriverObj = driver;
+                                    selectedDriver = id;
+                                  });
+                                  Navigator.pop(context);
+                                },
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-
-    // SUCCESS VIEW (Shows only after fine is successfully created)
+    // SUCCESS VIEW
     if (isCreated) {
       return Scaffold(
+        backgroundColor: const Color(0xFF021022),
         body: SafeArea(
           child: Center(
             child: SingleChildScrollView(
@@ -111,117 +355,93 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Animated-like Checkmark Ring
                   Container(
-                    height: 100,
-                    width: 100,
+                    height: 90,
+                    width: 90,
                     decoration: BoxDecoration(
-                      color: Colors.green.shade50,
+                      color: const Color(0xFF1FC97A).withOpacity(0.2),
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.green.shade200, width: 4),
+                      border: Border.all(color: const Color(0xFF1FC97A), width: 3),
                     ),
-                    child: Icon(Icons.check_circle_rounded, size: 64, color: Colors.green.shade600),
+                    child: const Icon(Icons.check_circle_rounded,
+                        size: 56, color: Color(0xFF1FC97A)),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
 
-                  Text(
+                  const Text(
                     "Ticket Issued Successfully!",
                     textAlign: TextAlign.center,
-                    style: theme.textTheme.headlineSmall?.copyWith(
+                    style: TextStyle(
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Colors.green.shade800,
+                      color: Color(0xFFFFF6EA),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
+                  const SizedBox(height: 6),
+                  const Text(
                     "The fine has been registered into the traffic system.",
                     textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
+                    style: TextStyle(fontSize: 13, color: Color(0xFFAACDE9)),
                   ),
 
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 28),
 
-                  // Big prominent Reference Number Card
-                  Card(
-                    color: theme.colorScheme.primaryContainer.withOpacity(0.4),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      side: BorderSide(color: theme.colorScheme.primary.withOpacity(0.2)),
+                  // Reference Card
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF07223A),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFF4AA3FF).withOpacity(0.5)),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-                      child: Column(
-                        children: [
-                          Text(
-                            "REFERENCE NUMBER",
-                            style: theme.textTheme.labelMedium?.copyWith(
-                              letterSpacing: 1.5,
-                              fontWeight: FontWeight.bold,
-                              color: theme.colorScheme.primary,
-                            ),
+                    child: Column(
+                      children: [
+                        const Text(
+                          "REFERENCE NUMBER",
+                          style: TextStyle(
+                            fontSize: 11,
+                            letterSpacing: 1.5,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFFD7A46B),
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            referenceNumber,
-                            style: theme.textTheme.headlineMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: theme.colorScheme.onPrimaryContainer,
-                              letterSpacing: 1.0,
-                            ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          referenceNumber,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF4AA3FF),
+                            letterSpacing: 1.0,
                           ),
-                        ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  SizedBox(
+                    height: 52,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const OfficerDashboard()),
+                          (route) => false,
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF4AA3FF),
+                        foregroundColor: const Color(0xFF021022),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16)),
                       ),
+                      child: const Text("RETURN TO DASHBOARD",
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.bold)),
                     ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Complete Breakdown Table / Details
-                  Text(
-                    "Ticket Details Summary",
-                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 12),
-                  Card(
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(color: theme.colorScheme.outlineVariant),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          _summaryRow("Category", "${selectedCategoryObj?['categoryCode']} - ${selectedCategoryObj?['categoryName']}"),
-                          const Divider(height: 20),
-                          _summaryRow("Fine Amount", "\$${selectedCategoryObj?['defaultAmount']}"),
-                          const Divider(height: 20),
-                          _summaryRow("Officer", "ID ${selectedOfficerObj?['id']} (${selectedOfficerObj?['username']})"),
-                          const Divider(height: 20),
-                          _summaryRow("Driver", "${selectedDriverObj?['username']} (ID: ${selectedDriverObj?['id']})"),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 40),
-
-                  // Redirect OK button
-                  FilledButton(
-                    onPressed: () {
-                      // Navigate directly to dashboard and remove previous setup from stack
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (context) => const OfficerDashboard()),
-                            (route) => false,
-                      );
-                    },
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: const Text("OK - Return to Dashboard", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
@@ -231,264 +451,233 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
       );
     }
 
-    // STANDARD FORM VIEW (Default initial view state)
-
+    // FORM INPUT VIEW
     return Scaffold(
+      backgroundColor: const Color(0xFF021022),
       appBar: AppBar(
-        title: const Text("Create Fine Ticket"),
-        centerTitle: true,
+        backgroundColor: const Color(0xFF07223A),
+        foregroundColor: const Color(0xFFEAF6FF),
         elevation: 0,
+        title: const Text("Issue Traffic Fine Ticket",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            //  CATEGORY
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: BorderSide(color: theme.colorScheme.outlineVariant),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Violation Category",
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.primary,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // 1. VIOLATION CATEGORY (SEARCHABLE PICKER)
+              GestureDetector(
+                onTap: _openCategoryPicker,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF07223A),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                        color: selectedCategoryObj != null
+                            ? const Color(0xFF4AA3FF)
+                            : const Color(0xFF1F4F78)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Violation Category",
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFFD7A46B)),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    DropdownSearch<Map<String, dynamic>>(
-                      items: categories.cast<Map<String, dynamic>>(),
-                      itemAsString: (i) =>
-                      "${i['categoryCode']} - ${i['categoryName']}",
-                      popupProps: const PopupProps.menu(showSearchBox: true),
-                      onChanged: (item) {
-                        setState(() {
-                          selectedCategoryObj = item;
-                          selectedCategory = item?['categoryCode'];
-                        });
-                      },
-                      dropdownDecoratorProps: const DropDownDecoratorProps(
-                        dropdownSearchDecoration: InputDecoration(
-                          prefixIcon: Icon(Icons.assignment_outlined),
-                          labelText: "Select Category",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(12)),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          const Icon(Icons.search, color: Color(0xFF4AA3FF), size: 20),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              selectedCategoryObj != null
+                                  ? "${selectedCategoryObj!['categoryCode']} - ${selectedCategoryObj!['categoryName']}"
+                                  : "Tap to search category by name or code...",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: selectedCategoryObj != null
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                                color: selectedCategoryObj != null
+                                    ? const Color(0xFFFFF6EA)
+                                    : const Color(0xFFAACDE9),
+                              ),
+                            ),
+                          ),
+                          const Icon(Icons.arrow_drop_down, color: Color(0xFF4AA3FF)),
+                        ],
+                      ),
+                      if (selectedCategoryObj != null) ...[
+                        const SizedBox(height: 10),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF06223B),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            "Fine Amount: LKR ${selectedCategoryObj!['defaultAmount']}",
+                            style: const TextStyle(
+                                color: Color(0xFF1FC97A),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13),
                           ),
                         ),
-                      ),
-                    ),
-                    if (selectedCategoryObj != null)
-                      _box(context, [
-                        "Code: ${selectedCategoryObj!['categoryCode']}",
-                        "Name: ${selectedCategoryObj!['categoryName']}",
-                        "Description: ${selectedCategoryObj!['description']}",
-                        "Amount: \$${selectedCategoryObj!['defaultAmount']}",
-                      ]),
-                  ],
+                      ]
+                    ],
+                  ),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            // OFFICER
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: BorderSide(color: theme.colorScheme.outlineVariant),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Issuing Officer",
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: officerIdController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        prefixIcon: Icon(Icons.badge_outlined),
-                        labelText: "Officer ID",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(12)),
-                        ),
-                      ),
-                      onChanged: fetchOfficerById,
-                    ),
-                    if (selectedOfficerObj != null)
-                      _box(context, [
-                        "ID: ${selectedOfficerObj!['id']}",
-                        "Username: ${selectedOfficerObj!['username']}",
-                        "Email: ${selectedOfficerObj!['email']}",
-                      ]),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // DRIVER
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: BorderSide(color: theme.colorScheme.outlineVariant),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Offending Driver",
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    DropdownSearch<Map<String, dynamic>>(
-                      items: drivers.cast<Map<String, dynamic>>(),
-                      itemAsString: (i) => "${i['id']} - ${i['username']}",
-                      popupProps: const PopupProps.menu(showSearchBox: true),
-                      onChanged: (item) {
-                        setState(() {
-                          selectedDriverObj = item;
-                          selectedDriver = item?['id'].toString();
-                        });
-                      },
-                      dropdownDecoratorProps: const DropDownDecoratorProps(
-                        dropdownSearchDecoration: InputDecoration(
-                          prefixIcon: Icon(Icons.person_outline),
-                          labelText: "Select Driver",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(12)),
-                          ),
-                        ),
-                      ),
-                    ),
-                    if (selectedDriverObj != null)
-                      _box(context, [
-                        "ID: ${selectedDriverObj!['id']}",
-                        "Username: ${selectedDriverObj!['username']}",
-                        "Phone: ${selectedDriverObj!['phoneNumber']}",
-                      ]),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 32),
-
-            // ISSUE BUTTON
-            FilledButton.icon(
-              onPressed: createFine,
-              style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-              icon: const Icon(Icons.gavel),
-              label: const Text(
-                "Issue Ticket",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // Error Message (Only shows if creation fails)
-            if (result.isNotEmpty && !isSuccess)
+              // 2. ISSUING OFFICER (LOCKED / READ-ONLY)
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.red.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.red.shade300),
+                  color: const Color(0xFF07223A),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0xFF1F4F78)),
                 ),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.error, color: Colors.red.shade700),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        result,
-                        style: TextStyle(color: Colors.red.shade900, fontWeight: FontWeight.w600),
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: const [
+                        Text(
+                          "Issuing Officer (Logged In)",
+                          style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFFD7A46B)),
+                        ),
+                        Icon(Icons.lock, color: Color(0xFF5AA3FF), size: 16),
+                      ],
                     ),
+                    const SizedBox(height: 10),
+                    _isLoadingOfficer
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                                color: Color(0xFF4AA3FF), strokeWidth: 2),
+                          )
+                        : Row(
+                            children: [
+                              const Icon(Icons.badge_outlined,
+                                  color: Color(0xFF4AA3FF), size: 20),
+                              const SizedBox(width: 10),
+                              Text(
+                                "ID: #${loggedInOfficerId ?? 'N/A'} — ${loggedInOfficerUsername ?? ''}",
+                                style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFFFFF6EA)),
+                              ),
+                            ],
+                          ),
                   ],
                 ),
               ),
-          ],
-        ),
-      ),
-    );
-  }
 
-  // BOX UI HELPERS
-  Widget _box(BuildContext context, List<String> items) {
-    final theme = Theme.of(context);
-    return Container(
-      margin: const EdgeInsets.only(top: 12),
-      padding: const EdgeInsets.all(12),
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.primaryContainer.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: items.map((e) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2),
-            child: Text(
-              e,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onPrimaryContainer,
+              const SizedBox(height: 16),
+
+              // 3. OFFENDING DRIVER (SEARCHABLE PICKER)
+              GestureDetector(
+                onTap: _openDriverPicker,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF07223A),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                        color: selectedDriverObj != null
+                            ? const Color(0xFF4AA3FF)
+                            : const Color(0xFF1F4F78)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Offending Driver",
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFFD7A46B)),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          const Icon(Icons.person_search,
+                              color: Color(0xFF4AA3FF), size: 20),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              selectedDriverObj != null
+                                  ? "Driver: ${selectedDriverObj!['username']} (ID: #${selectedDriverObj!['id']})"
+                                  : "Tap to search driver by ID, Name, or NIC...",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: selectedDriverObj != null
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                                color: selectedDriverObj != null
+                                    ? const Color(0xFFFFF6EA)
+                                    : const Color(0xFFAACDE9),
+                              ),
+                            ),
+                          ),
+                          const Icon(Icons.arrow_drop_down, color: Color(0xFF4AA3FF)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
 
-  Widget _summaryRow(String label, String value) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          flex: 2,
-          child: Text(
-            label,
-            style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.grey),
+              const SizedBox(height: 24),
+
+              if (result.isNotEmpty && !isSuccess)
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade900.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.red.shade700.withOpacity(0.5)),
+                  ),
+                  child: Text(result,
+                      style: const TextStyle(
+                          color: Color(0xFFFF8A8A), fontSize: 13)),
+                ),
+
+              SizedBox(
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: createFine,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF4AA3FF),
+                    foregroundColor: const Color(0xFF021022),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                  ),
+                  child: const Text("ISSUE FINE TICKET",
+                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
           ),
         ),
-        Expanded(
-          flex: 3,
-          child: Text(
-            value,
-            textAlign: TextAlign.end,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

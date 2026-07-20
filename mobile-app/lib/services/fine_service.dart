@@ -89,6 +89,80 @@ class FineService {
     return [];
   }
 
+  Future<List<Fine>> getOfficerFines() async {
+    final token = await ApiService.getToken();
+    if (token == null) {
+      print("FineService getOfficerFines: No JWT token found.");
+      return [];
+    }
+
+    try {
+      Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+      final rawId = decodedToken['id'] ?? decodedToken['userId'];
+      final int? officerId = rawId != null ? int.tryParse(rawId.toString()) : null;
+
+      print("FineService getOfficerFines: Token parsed officerId = $officerId (raw: $rawId)");
+
+      if (officerId == null) {
+        print("FineService getOfficerFines: Officer ID could not be extracted from token.");
+        return [];
+      }
+
+      final response = await http.get(
+        Uri.parse("$baseUrl/fines/officer/$officerId"),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      print("FineService getOfficerFines HTTP ${response.statusCode}: ${response.body}");
+
+      if (response.statusCode == 200) {
+        List<dynamic> data = jsonDecode(response.body);
+        return data.map((fine) => Fine.fromJson(fine)).toList();
+      }
+    } catch (e) {
+      print("Error fetching officer fines: $e");
+    }
+    return [];
+  }
+
+  Future<Fine?> updateFine(int id, String categoryCode, int driverId) async {
+    final token = await ApiService.getToken();
+
+    final response = await http.put(
+      Uri.parse("$baseUrl/fines/$id"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: jsonEncode({
+        "categoryCode": categoryCode,
+        "driverId": driverId,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      return Fine.fromJson(jsonDecode(response.body));
+    }
+    return null;
+  }
+
+  Future<bool> deleteFine(int id) async {
+    final token = await ApiService.getToken();
+
+    final response = await http.delete(
+      Uri.parse("$baseUrl/fines/$id"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    return response.statusCode == 200;
+  }
+
   Future<List<dynamic>> getAllCategories() async {
     final response = await http.get(Uri.parse("$baseUrl/categories"));
 

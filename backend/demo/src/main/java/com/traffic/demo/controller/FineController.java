@@ -37,6 +37,22 @@ public class FineController {
         return fineService.getFinesByDriver(driverId);
     }
 
+    @GetMapping("/officer/{officerId}")
+    public List<FineResponse> getFinesByOfficer(@PathVariable Long officerId) {
+        return fineService.getFinesByOfficer(officerId);
+    }
+
+    @PutMapping("/{id}")
+    public FineResponse updateFine(@PathVariable Long id, @RequestBody CreateFineRequest request) {
+        return fineService.updateFine(id, request);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteFine(@PathVariable Long id) {
+        fineService.deleteFine(id);
+        return ResponseEntity.ok("Fine deleted successfully.");
+    }
+
     @PutMapping("/{referenceNumber}/mark-paid")
     public ResponseEntity<String> markAsPaid(
             @PathVariable String referenceNumber) {

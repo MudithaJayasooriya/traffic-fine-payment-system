@@ -1,5 +1,4 @@
 class Fine {
-
   final int id;
   final String referenceNumber;
   final String categoryName;
@@ -7,6 +6,7 @@ class Fine {
   final String status;
   final int officerId;
   final int driverId;
+  final String? fineDate;
 
   Fine({
     required this.id,
@@ -16,18 +16,19 @@ class Fine {
     required this.status,
     required this.officerId,
     required this.driverId,
+    this.fineDate,
   });
 
-  factory Fine.fromJson(Map<String,dynamic> json){
-
+  factory Fine.fromJson(Map<String, dynamic> json) {
     return Fine(
       id: json['id'] ?? 0,
-      referenceNumber: json["referenceNumber"],
-      categoryName: json["categoryName"],
-      amount: json["amount"].toDouble(),
-      status: json["status"],
-      officerId: json["officerId"],
-      driverId: json["driverId"],
+      referenceNumber: json["referenceNumber"] ?? "",
+      categoryName: json["categoryName"] ?? "",
+      amount: (json["amount"] ?? 0).toDouble(),
+      status: json["status"] ?? "NOT_PAID",
+      officerId: json["officerId"] ?? 0,
+      driverId: json["driverId"] ?? 0,
+      fineDate: json["fineDate"]?.toString(),
     );
   }
 }

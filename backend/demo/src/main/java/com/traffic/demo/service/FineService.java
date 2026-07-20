@@ -13,5 +13,11 @@ public interface FineService {
 
     List<FineResponse> getFinesByDriver(Long driverId);
 
+    List<FineResponse> getFinesByOfficer(Long officerId);
+
+    FineResponse updateFine(Long id, CreateFineRequest request);
+
+    void deleteFine(Long id);
+
     void markAsPaid(String referenceNumber);
 }

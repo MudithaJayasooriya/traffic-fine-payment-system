@@ -47,6 +47,7 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/api/users/**").permitAll()
+                        .requestMatchers("/api/fines/**").permitAll()
                         .requestMatchers("/api/categories").permitAll()
                         .requestMatchers("/api/categories/search").permitAll()
 
@@ -59,8 +60,6 @@ public class SecurityConfig {
 
                         // Admin only
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/fines").hasRole("OFFICER")
-                        .requestMatchers("/api/fines/**").authenticated()
 
                         // Everything else requires auth
                         .anyRequest().authenticated()

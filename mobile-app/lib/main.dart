@@ -6,6 +6,9 @@ import 'screens/landing_screen.dart';
 import 'screens/driver/driver_home_screen.dart';
 import 'screens/officer/reset_password_screen.dart';
 import 'screens/officer/officer_dashboard.dart';
+import 'screens/officer/officer_home_screen.dart';
+import 'screens/officer/categories_screen.dart';
+import 'screens/officer/issued_fines_screen.dart';
 import 'core/constants.dart';
 
 void main() async {
@@ -106,7 +109,9 @@ class MyApp extends StatelessWidget {
         '/register': (_) => const RegisterScreen(),
         '/driver-home': (_) => const DriverHomeScreen(),
         '/reset-password': (_) => const ResetPasswordScreen(),
-        '/officer-home': (_) => const OfficerDashboard(),
+        '/officer-home': (_) => const OfficerHomeScreen(),
+        '/categories': (_) => const CategoriesScreen(),
+        '/issued-fines': (_) => const IssuedFinesScreen(),
       },
     );
   }

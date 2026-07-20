@@ -125,6 +125,73 @@ public class FineServiceImpl implements FineService {
     }
 
     @Override
+    public List<FineResponse> getFinesByOfficer(Long officerId) {
+
+        List<Fine> fines = fineRepository.findByOfficerId(officerId);
+
+        return fines.stream().map(fine ->
+                new FineResponse(
+                        fine.getId(),
+                        fine.getReferenceNumber(),
+                        fine.getCategory().getCategoryCode(),
+                        fine.getCategory().getCategoryName(),
+                        fine.getAmount(),
+                        fine.getStatus(),
+                        fine.getFineDate(),
+                        fine.getOfficerId(),
+                        fine.getDriverId()
+                )
+        ).toList();
+    }
+
+    @Override
+    public FineResponse updateFine(Long id, CreateFineRequest request) {
+        Fine fine = fineRepository.findById(id)
+                .orElseThrow(() -> new FineNotFoundException("Fine ticket not found: " + id));
+
+        if ("PAID".equalsIgnoreCase(fine.getStatus())) {
+            throw new IllegalStateException("Paid fines cannot be edited.");
+        }
+
+        if (request.getCategoryCode() != null && !request.getCategoryCode().isEmpty()) {
+            FineCategory category = categoryRepository.findByCategoryCode(request.getCategoryCode())
+                    .orElseThrow(() -> new RuntimeException("Category not found"));
+            fine.setCategory(category);
+            fine.setAmount(category.getDefaultAmount());
+        }
+
+        if (request.getDriverId() != null) {
+            fine.setDriverId(request.getDriverId());
+        }
+
+        Fine updated = fineRepository.save(fine);
+
+        return new FineResponse(
+                updated.getId(),
+                updated.getReferenceNumber(),
+                updated.getCategory().getCategoryCode(),
+                updated.getCategory().getCategoryName(),
+                updated.getAmount(),
+                updated.getStatus(),
+                updated.getFineDate(),
+                updated.getOfficerId(),
+                updated.getDriverId()
+        );
+    }
+
+    @Override
+    public void deleteFine(Long id) {
+        Fine fine = fineRepository.findById(id)
+                .orElseThrow(() -> new FineNotFoundException("Fine ticket not found: " + id));
+
+        if ("PAID".equalsIgnoreCase(fine.getStatus())) {
+            throw new IllegalStateException("Paid fines cannot be deleted.");
+        }
+
+        fineRepository.delete(fine);
+    }
+
+    @Override
     public void markAsPaid(String referenceNumber) {
         System.out.println();
         System.out.println("===== PAYMENT COMPLETION =====");
