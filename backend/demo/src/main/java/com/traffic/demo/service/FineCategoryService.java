@@ -48,4 +48,13 @@ public class FineCategoryService {
     public void delete(Long id) {
         repository.deleteById(id);
     }
+    public FineCategory update(Long id, FineCategoryRequest request) {
+        FineCategory category = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Fine Category not found: " + id));
+        category.setCategoryCode(request.getCategoryCode());
+        category.setCategoryName(request.getCategoryName());
+        category.setDescription(request.getDescription());
+        category.setDefaultAmount(request.getDefaultAmount());
+        return repository.save(category);
+    }
 }

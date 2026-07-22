@@ -11,6 +11,7 @@ class FineService {
     String categoryCode,
     int officerId,
     int driverId,
+    String district,
   ) async {
     final token = await ApiService.getToken();
 
@@ -24,6 +25,7 @@ class FineService {
         "categoryCode": categoryCode,
         "officerId": officerId,
         "driverId": driverId,
+        "district": district,
       }),
     );
 

@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import API from "../api/axiosInstance";
-import { FaPlus, FaTimes, FaListAlt } from "react-icons/fa";
+import { FaPlus, FaTimes, FaListAlt, FaEdit, FaTrash } from "react-icons/fa";
 
 function ManageCategories() {
   const [categories, setCategories] = useState([]);
   const [showForm, setShowForm] = useState(false);
+  const [editId, setEditId] = useState(null);
   const [formData, setFormData] = useState({
     categoryCode: "",
     categoryName: "",
@@ -27,6 +28,34 @@ function ManageCategories() {
     }
   };
 
+  const handleEdit = (category) => {
+    setEditId(category.id);
+    setFormData({
+      categoryCode: category.categoryCode,
+      categoryName: category.categoryName,
+      defaultAmount: category.defaultAmount,
+      description: category.description || ""
+    });
+    setShowForm(true);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this category? Any existing fines in this category will remain, but new ones cannot be created under this code.")) {
+      try {
+        await API.delete(`/api/admin/categories/${id}`);
+        fetchCategories();
+      } catch (error) {
+        alert("Failed to delete category: " + (error.response?.data || error.message));
+      }
+    }
+  };
+
+  const handleAddClick = () => {
+    setEditId(null);
+    setFormData({ categoryCode: "", categoryName: "", defaultAmount: "", description: "" });
+    setShowForm(true);
+  };
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -34,18 +63,28 @@ function ManageCategories() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await API.post("/api/admin/categories", {
-        categoryCode: formData.categoryCode,
-        categoryName: formData.categoryName,
-        defaultAmount: parseFloat(formData.defaultAmount),
-        description: formData.description
-      });
+      if (editId) {
+        await API.put(`/api/admin/categories/${editId}`, {
+          categoryCode: formData.categoryCode,
+          categoryName: formData.categoryName,
+          defaultAmount: parseFloat(formData.defaultAmount),
+          description: formData.description
+        });
+      } else {
+        await API.post("/api/admin/categories", {
+          categoryCode: formData.categoryCode,
+          categoryName: formData.categoryName,
+          defaultAmount: parseFloat(formData.defaultAmount),
+          description: formData.description
+        });
+      }
       
       setFormData({ categoryCode: "", categoryName: "", defaultAmount: "", description: "" });
+      setEditId(null);
       setShowForm(false);
       fetchCategories();
     } catch (error) {
-      alert("Error adding category: " + (error.response?.data || error.message));
+      alert("Error saving category: " + (error.response?.data || error.message));
     }
   };
 
@@ -58,7 +97,7 @@ function ManageCategories() {
 
         <div className="mt-6 flex justify-end">
           <button
-            onClick={() => setShowForm(true)}
+            onClick={handleAddClick}
             className="font-bold px-5 py-3 rounded-xl shadow-lg flex items-center gap-2 cursor-pointer transition-all duration-200 hover:brightness-110"
             style={{ backgroundColor: "#4aa3ff", color: "#021022" }}
           >
@@ -74,12 +113,13 @@ function ManageCategories() {
                 <th className="p-4 font-bold text-xs uppercase tracking-wider" style={{ color: "#9fcfff" }}>Category Code</th>
                 <th className="p-4 font-bold text-xs uppercase tracking-wider" style={{ color: "#9fcfff" }}>Violation Name</th>
                 <th className="p-4 font-bold text-xs uppercase tracking-wider text-right" style={{ color: "#9fcfff" }}>Default Fine Amount</th>
+                <th className="p-4 font-bold text-xs uppercase tracking-wider text-center" style={{ color: "#9fcfff" }}>Actions</th>
               </tr>
             </thead>
             <tbody className="text-sm" style={{ backgroundColor: "#062033" }}>
               {categories.length === 0 ? (
                 <tr>
-                  <td colSpan="3" className="p-8 text-center font-medium" style={{ color: "#aacde9", backgroundColor: "#062033" }}>
+                  <td colSpan="4" className="p-8 text-center font-medium" style={{ color: "#aacde9", backgroundColor: "#062033" }}>
                     No fine categories configured yet.
                   </td>
                 </tr>
@@ -101,6 +141,22 @@ function ManageCategories() {
                     <td className="p-4 text-right font-extrabold text-base" style={{ color: "#1fc97a" }}>
                       Rs. {category.defaultAmount?.toLocaleString()}
                     </td>
+                    <td className="p-4 text-center flex items-center justify-center gap-2">
+                      <button
+                        onClick={() => handleEdit(category)}
+                        className="p-2 rounded-lg bg-blue-950/40 border border-blue-800/40 text-blue-400 hover:bg-blue-900/60 hover:text-blue-300 transition duration-150 cursor-pointer"
+                        title="Edit Category"
+                      >
+                        <FaEdit />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(category.id)}
+                        className="p-2 rounded-lg bg-red-950/40 border border-red-800/40 text-red-400 hover:bg-red-900/60 hover:text-red-300 transition duration-150 cursor-pointer"
+                        title="Delete Category"
+                      >
+                        <FaTrash />
+                      </button>
+                    </td>
                   </tr>
                 ))
               )}
@@ -117,7 +173,9 @@ function ManageCategories() {
                   <div className="p-2.5 rounded-xl bg-[#072b46] text-[#4aa3ff] border border-[#4aa3ff]/30">
                     <FaListAlt />
                   </div>
-                  <h2 className="text-xl font-bold" style={{ color: "#eaf6ff" }}>Create Fine Category</h2>
+                  <h2 className="text-xl font-bold" style={{ color: "#eaf6ff" }}>
+                    {editId ? "Edit Fine Category" : "Create Fine Category"}
+                  </h2>
                 </div>
                 <button onClick={() => setShowForm(false)} style={{ color: "#aacde9" }} className="text-lg hover:text-red-400">
                   <FaTimes />

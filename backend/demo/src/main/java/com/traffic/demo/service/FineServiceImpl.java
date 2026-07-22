@@ -67,6 +67,7 @@ public class FineServiceImpl implements FineService {
         fine.setOfficerId(request.getOfficerId());
         fine.setDriverId(request.getDriverId());
         fine.setFineDate(LocalDate.now());
+        fine.setDistrict(request.getDistrict() != null && !request.getDistrict().isEmpty() ? request.getDistrict() : "Colombo");
 
         Fine savedFine = fineRepository.save(fine);
 
@@ -79,7 +80,8 @@ public class FineServiceImpl implements FineService {
                 savedFine.getStatus(),
                 savedFine.getFineDate(),
                 savedFine.getOfficerId(),
-                savedFine.getDriverId()
+                savedFine.getDriverId(),
+                savedFine.getDistrict()
         );
     }
 
@@ -100,7 +102,8 @@ public class FineServiceImpl implements FineService {
                 fine.getStatus(),
                 fine.getFineDate(),
                 fine.getOfficerId(),
-                fine.getDriverId()
+                fine.getDriverId(),
+                fine.getDistrict()
         );
     }
 
@@ -119,7 +122,8 @@ public class FineServiceImpl implements FineService {
                         fine.getStatus(),
                         fine.getFineDate(),
                         fine.getOfficerId(),
-                        fine.getDriverId()
+                        fine.getDriverId(),
+                        fine.getDistrict()
                 )
         ).toList();
     }
@@ -139,7 +143,8 @@ public class FineServiceImpl implements FineService {
                         fine.getStatus(),
                         fine.getFineDate(),
                         fine.getOfficerId(),
-                        fine.getDriverId()
+                        fine.getDriverId(),
+                        fine.getDistrict()
                 )
         ).toList();
     }
@@ -164,6 +169,10 @@ public class FineServiceImpl implements FineService {
             fine.setDriverId(request.getDriverId());
         }
 
+        if (request.getDistrict() != null && !request.getDistrict().isEmpty()) {
+            fine.setDistrict(request.getDistrict());
+        }
+
         Fine updated = fineRepository.save(fine);
 
         return new FineResponse(
@@ -175,7 +184,8 @@ public class FineServiceImpl implements FineService {
                 updated.getStatus(),
                 updated.getFineDate(),
                 updated.getOfficerId(),
-                updated.getDriverId()
+                updated.getDriverId(),
+                updated.getDistrict()
         );
     }
 

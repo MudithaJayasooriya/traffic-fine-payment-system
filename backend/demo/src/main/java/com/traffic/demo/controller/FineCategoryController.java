@@ -42,6 +42,12 @@ public class FineCategoryController {
         service.delete(id);
     }
 
+    @PutMapping("/api/admin/categories/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public FineCategory update(@PathVariable Long id, @RequestBody FineCategoryRequest request) {
+        return service.update(id, request);
+    }
+
 // PUBLIC / USER ACCESS
 
     //  GET ALL CATEGORIES FOR DROPDOWN

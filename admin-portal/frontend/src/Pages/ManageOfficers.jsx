@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import API from "../api/axiosInstance";
-import { FaUserPlus, FaTimes, FaUserShield } from "react-icons/fa";
+import { FaUserPlus, FaTimes, FaUserShield, FaTrash } from "react-icons/fa";
 
 function ManageOfficers() {
   const [officers, setOfficers] = useState([]);
@@ -25,6 +25,17 @@ function ManageOfficers() {
       setOfficers(response.data);
     } catch (error) {
       console.error("Could not fetch officers list", error);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to remove this officer account?")) {
+      try {
+        await API.delete(`/api/admin/officers/${id}`);
+        fetchOfficers();
+      } catch (error) {
+        alert("Failed to remove officer: " + (error.response?.data || error.message));
+      }
     }
   };
 
@@ -78,12 +89,13 @@ function ManageOfficers() {
                 <th className="p-4 font-bold text-xs uppercase tracking-wider" style={{ color: "#9fcfff" }}>Email Address</th>
                 <th className="p-4 font-bold text-xs uppercase tracking-wider" style={{ color: "#9fcfff" }}>NIC Number</th>
                 <th className="p-4 font-bold text-xs uppercase tracking-wider" style={{ color: "#9fcfff" }}>Phone Number</th>
+                <th className="p-4 font-bold text-xs uppercase tracking-wider text-center" style={{ color: "#9fcfff" }}>Actions</th>
               </tr>
             </thead>
             <tbody className="text-sm" style={{ backgroundColor: "#062033" }}>
               {officers.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="p-8 text-center font-medium" style={{ color: "#aacde9", backgroundColor: "#062033" }}>
+                  <td colSpan="6" className="p-8 text-center font-medium" style={{ color: "#aacde9", backgroundColor: "#062033" }}>
                     No active traffic officers registered yet.
                   </td>
                 </tr>
@@ -101,6 +113,15 @@ function ManageOfficers() {
                     <td className="p-4 font-medium" style={{ color: "#4aa3ff" }}>{officer.email}</td>
                     <td className="p-4 font-mono font-bold" style={{ color: "#d7a46b" }}>{officer.nicNumber}</td>
                     <td className="p-4 font-medium" style={{ color: "#eaf6ff" }}>{officer.phoneNumber}</td>
+                    <td className="p-4 text-center">
+                      <button
+                        onClick={() => handleDelete(officer.id)}
+                        className="p-2 rounded-lg bg-red-950/40 border border-red-800/40 text-red-400 hover:bg-red-900/60 hover:text-red-300 transition duration-150 cursor-pointer"
+                        title="Delete Officer Account"
+                      >
+                        <FaTrash />
+                      </button>
+                    </td>
                   </tr>
                 ))
               )}

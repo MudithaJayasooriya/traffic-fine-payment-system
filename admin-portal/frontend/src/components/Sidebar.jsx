@@ -25,7 +25,7 @@ function Sidebar() {
     { path: "/categories", label: "Categories", icon: FaListAlt },
     { path: "/officers", label: "Officers", icon: FaUserShield },
     { path: "/reports", label: "Revenue Reports", icon: FaMoneyBillWave },
-    { path: "/pending-fines", label: "Pending Fines", icon: FaExclamationTriangle },
+    { path: "/pending-fines", label: "Fines List", icon: FaExclamationTriangle },
     { path: "/statistics", label: "Statistics", icon: FaChartBar },
   ];
 

@@ -24,6 +24,7 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
 
   String? selectedCategory;
   String? selectedDriver;
+  String selectedDistrict = "Colombo";
 
   // Officer Info (Locked)
   int? loggedInOfficerId;
@@ -90,6 +91,7 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
       selectedCategory!,
       loggedInOfficerId!,
       int.parse(selectedDriver!),
+      selectedDistrict,
     );
 
     setState(() {
@@ -726,6 +728,77 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
                       ),
                     ],
                   ),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // 4. DISTRICT SELECTION (DROPDOWN)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF07223A),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0xFF1F4F78)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 8),
+                    const Text(
+                      "Violation District",
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFD7A46B),
+                      ),
+                    ),
+                    DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: selectedDistrict,
+                        isExpanded: true,
+                        dropdownColor: const Color(0xFF07223A),
+                        icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF4AA3FF)),
+                        style: const TextStyle(
+                          color: Color(0xFFFFF6EA),
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        items: const [
+                          DropdownMenuItem(value: "Ampara", child: Text("Ampara")),
+                          DropdownMenuItem(value: "Anuradhapura", child: Text("Anuradhapura")),
+                          DropdownMenuItem(value: "Badulla", child: Text("Badulla")),
+                          DropdownMenuItem(value: "Batticaloa", child: Text("Batticaloa")),
+                          DropdownMenuItem(value: "Colombo", child: Text("Colombo")),
+                          DropdownMenuItem(value: "Galle", child: Text("Galle")),
+                          DropdownMenuItem(value: "Gampaha", child: Text("Gampaha")),
+                          DropdownMenuItem(value: "Hambantota", child: Text("Hambantota")),
+                          DropdownMenuItem(value: "Jaffna", child: Text("Jaffna")),
+                          DropdownMenuItem(value: "Kalutara", child: Text("Kalutara")),
+                          DropdownMenuItem(value: "Kandy", child: Text("Kandy")),
+                          DropdownMenuItem(value: "Kegalle", child: Text("Kegalle")),
+                          DropdownMenuItem(value: "Kilinochchi", child: Text("Kilinochchi")),
+                          DropdownMenuItem(value: "Kurunegala", child: Text("Kurunegala")),
+                          DropdownMenuItem(value: "Mannar", child: Text("Mannar")),
+                          DropdownMenuItem(value: "Matale", child: Text("Matale")),
+                          DropdownMenuItem(value: "Matara", child: Text("Matara")),
+                          DropdownMenuItem(value: "Moneragala", child: Text("Moneragala")),
+                          DropdownMenuItem(value: "Mullaitivu", child: Text("Mullaitivu")),
+                          DropdownMenuItem(value: "Nuwara Eliya", child: Text("Nuwara Eliya")),
+                          DropdownMenuItem(value: "Polonnaruwa", child: Text("Polonnaruwa")),
+                          DropdownMenuItem(value: "Puttalam", child: Text("Puttalam")),
+                          DropdownMenuItem(value: "Ratnapura", child: Text("Ratnapura")),
+                          DropdownMenuItem(value: "Trincomalee", child: Text("Trincomalee")),
+                          DropdownMenuItem(value: "Vavuniya", child: Text("Vavuniya")),
+                        ],
+                        onChanged: (val) {
+                          setState(() {
+                            selectedDistrict = val ?? "Colombo";
+                          });
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ),
 

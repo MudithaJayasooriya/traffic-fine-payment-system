@@ -123,4 +123,14 @@ public class AuthService {
     public List<User> getUsersByRole(Role role) {
         return userRepository.findByRole(role);
     }
+
+    // DELETE USER BY ID (Admins only)
+    public void deleteUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + id));
+        if (user.getRole() != Role.OFFICER) {
+            throw new IllegalArgumentException("Only Officer accounts can be deleted via this endpoint.");
+        }
+        userRepository.delete(user);
+    }
 }

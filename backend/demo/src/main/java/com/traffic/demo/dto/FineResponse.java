@@ -13,6 +13,7 @@ public class FineResponse {
     private LocalDate fineDate;
     private Long officerId;
     private Long driverId;
+    private String district;
 
     public FineResponse(
             Long id,
@@ -23,7 +24,8 @@ public class FineResponse {
             String status,
             LocalDate fineDate,
             Long officerId,
-            Long driverId) {
+            Long driverId,
+            String district) {
 
         this.id=id;
         this.referenceNumber = referenceNumber;
@@ -34,6 +36,7 @@ public class FineResponse {
         this.fineDate = fineDate;
         this.officerId = officerId;
         this.driverId = driverId;
+        this.district = district;
     }
 
     public Long getId() {
@@ -58,6 +61,10 @@ public class FineResponse {
 
     public String getStatus() {
         return status;
+    }
+
+    public String getDistrict() {
+        return district;
     }
 
     public LocalDate getFineDate() {

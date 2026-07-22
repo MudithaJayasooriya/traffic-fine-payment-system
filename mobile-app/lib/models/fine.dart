@@ -7,6 +7,7 @@ class Fine {
   final int officerId;
   final int driverId;
   final String? fineDate;
+  final String? district;
 
   Fine({
     required this.id,
@@ -17,6 +18,7 @@ class Fine {
     required this.officerId,
     required this.driverId,
     this.fineDate,
+    this.district,
   });
 
   factory Fine.fromJson(Map<String, dynamic> json) {
@@ -29,6 +31,7 @@ class Fine {
       officerId: json["officerId"] ?? 0,
       driverId: json["driverId"] ?? 0,
       fineDate: json["fineDate"]?.toString(),
+      district: json["district"]?.toString(),
     );
   }
 }

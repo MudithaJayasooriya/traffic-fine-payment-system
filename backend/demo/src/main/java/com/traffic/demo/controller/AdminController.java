@@ -39,5 +39,16 @@ public class AdminController {
         }
     }
 
+    @DeleteMapping("/officers/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> deleteOfficer(@PathVariable Long id) {
+        try {
+            authService.deleteUserById(id);
+            return ResponseEntity.ok("Traffic Officer deleted successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 }
 

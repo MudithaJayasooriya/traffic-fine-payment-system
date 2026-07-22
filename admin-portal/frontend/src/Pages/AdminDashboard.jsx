@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import StatCard from "../components/StatCard";
@@ -6,6 +7,7 @@ import API from "../api/axiosInstance";
 import { FaMoneyBillWave, FaCheckCircle, FaExclamationTriangle, FaListAlt } from "react-icons/fa";
 
 function AdminDashboard() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalRevenue: 0,
     paidFinesCount: 0,
@@ -58,18 +60,21 @@ function AdminDashboard() {
             value={stats.paidFinesCount}
             icon={FaCheckCircle}
             color="text-[#4aa3ff]"
+            onClick={() => navigate("/pending-fines?status=PAID")}
           />
           <StatCard
             title="Pending Fines"
             value={stats.pendingFinesCount}
             icon={FaExclamationTriangle}
             color="text-[#ff8a4d]"
+            onClick={() => navigate("/pending-fines?status=NOT_PAID")}
           />
           <StatCard
             title="Fine Categories"
             value={stats.totalCategories}
             icon={FaListAlt}
             color="text-[#d7a46b]"
+            onClick={() => navigate("/categories")}
           />
         </div>
       </div>

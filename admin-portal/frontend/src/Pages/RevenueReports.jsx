@@ -71,9 +71,31 @@ function RevenueReports() {
               onChange={(e) => setFilters({ ...filters, district: e.target.value })}
             >
               <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>All Districts</option>
+              <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>Ampara</option>
+              <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>Anuradhapura</option>
+              <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>Badulla</option>
+              <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>Batticaloa</option>
               <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>Colombo</option>
-              <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>Kandy</option>
               <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>Galle</option>
+              <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>Gampaha</option>
+              <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>Hambantota</option>
+              <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>Jaffna</option>
+              <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>Kalutara</option>
+              <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>Kandy</option>
+              <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>Kegalle</option>
+              <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>Kilinochchi</option>
+              <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>Kurunegala</option>
+              <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>Mannar</option>
+              <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>Matale</option>
+              <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>Matara</option>
+              <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>Moneragala</option>
+              <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>Mullaitivu</option>
+              <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>Nuwara Eliya</option>
+              <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>Polonnaruwa</option>
+              <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>Puttalam</option>
+              <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>Ratnapura</option>
+              <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>Trincomalee</option>
+              <option style={{ backgroundColor: "#07223a", color: "#eaf6ff" }}>Vavuniya</option>
             </select>
             <button onClick={fetchReportData} className="font-bold py-3 rounded-xl transition cursor-pointer shadow-lg hover:brightness-110" style={{ backgroundColor: "#4aa3ff", color: "#021022" }}>
               Filter Reports

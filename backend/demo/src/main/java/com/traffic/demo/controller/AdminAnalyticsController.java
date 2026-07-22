@@ -26,6 +26,13 @@ public class AdminAnalyticsController {
     private final FineCategoryRepository fineCategoryRepository;
     private final com.traffic.demo.repository.UserRepository userRepository;
 
+    private static final List<String> ALL_DISTRICTS = List.of(
+        "Ampara", "Anuradhapura", "Badulla", "Batticaloa", "Colombo", "Galle", "Gampaha",
+        "Hambantota", "Jaffna", "Kalutara", "Kandy", "Kegalle", "Kilinochchi", "Kurunegala",
+        "Mannar", "Matale", "Matara", "Moneragala", "Mullaitivu", "Nuwara Eliya",
+        "Polonnaruwa", "Puttalam", "Ratnapura", "Trincomalee", "Vavuniya"
+    );
+
     // 1. FOR: AdminDashboard.jsx (/api/dashboard/stats)
     @GetMapping("/dashboard/stats")
     public Map<String, Object> getDashboardStats() {
@@ -52,10 +59,11 @@ public class AdminAnalyticsController {
     public Map<String, Object> getPendingFines(
             @RequestParam(required = false) String ref,
             @RequestParam(required = false) String nic,
-            @RequestParam(required = false) String district) {
+            @RequestParam(required = false) String district,
+            @RequestParam(required = false, defaultValue = "NOT_PAID") String status) {
 
         List<Fine> pendingFines = fineRepository.findAll().stream()
-                .filter(f -> "NOT_PAID".equals(f.getStatus()))
+                .filter(f -> status == null || status.trim().isEmpty() || "ALL".equalsIgnoreCase(status) || f.getStatus().equalsIgnoreCase(status))
                 .filter(f -> ref == null || ref.trim().isEmpty() || f.getReferenceNumber().toLowerCase().contains(ref.toLowerCase()))
                 .toList();
 
@@ -78,13 +86,7 @@ public class AdminAnalyticsController {
 
                     map.put("driverNic", driverNicNumber); // Maps to fine.driverNic in React
                     
-                    // Dynamically map district based on ID to distribute the data
-                    String districtName = "Colombo";
-                    if (f.getId() % 3 == 1) {
-                        districtName = "Kandy";
-                    } else if (f.getId() % 3 == 2) {
-                        districtName = "Galle";
-                    }
+                    String districtName = f.getDistrict() != null && !f.getDistrict().isEmpty() ? f.getDistrict() : "Colombo";
                     map.put("district", districtName); // Maps to fine.district in React
                     
                     map.put("category", f.getCategory() != null ? f.getCategory().getCategoryName() : "General Traffic Fine");
@@ -154,8 +156,10 @@ public class AdminAnalyticsController {
             
             String districtName = "Colombo";
             if (p.getFineId() != null) {
-                if (p.getFineId() % 3 == 1) districtName = "Kandy";
-                else if (p.getFineId() % 3 == 2) districtName = "Galle";
+                Optional<Fine> fineOpt = fineRepository.findById(p.getFineId());
+                if (fineOpt.isPresent() && fineOpt.get().getDistrict() != null && !fineOpt.get().getDistrict().isEmpty()) {
+                    districtName = fineOpt.get().getDistrict();
+                }
             }
             t.put("district", districtName);
             
@@ -181,9 +185,9 @@ public class AdminAnalyticsController {
         Map<String, Double> categoryCollectionMap = new HashMap<>();
 
         // Initialize defaults
-        districtCollectionMap.put("Colombo", 0.0);
-        districtCollectionMap.put("Kandy", 0.0);
-        districtCollectionMap.put("Galle", 0.0);
+        for (String dist : ALL_DISTRICTS) {
+            districtCollectionMap.put(dist, 0.0);
+        }
 
         for (Map<String, Object> t : transactions) {
             String dist = (String) t.get("district");
@@ -231,15 +235,17 @@ public class AdminAnalyticsController {
 
         // 1. District chart map format (Group by dynamic district based on fine id)
         Map<String, Double> districtRevenueMap = new HashMap<>();
-        districtRevenueMap.put("Colombo", 0.0);
-        districtRevenueMap.put("Kandy", 0.0);
-        districtRevenueMap.put("Galle", 0.0);
+        for (String dist : ALL_DISTRICTS) {
+            districtRevenueMap.put(dist, 0.0);
+        }
 
         for (Payment p : successPayments) {
             String dist = "Colombo";
             if (p.getFineId() != null) {
-                if (p.getFineId() % 3 == 1) dist = "Kandy";
-                else if (p.getFineId() % 3 == 2) dist = "Galle";
+                Optional<Fine> fineOpt = fineRepository.findById(p.getFineId());
+                if (fineOpt.isPresent() && fineOpt.get().getDistrict() != null && !fineOpt.get().getDistrict().isEmpty()) {
+                    dist = fineOpt.get().getDistrict();
+                }
             }
             districtRevenueMap.put(dist, districtRevenueMap.getOrDefault(dist, 0.0) + p.getAmount());
         }

@@ -34,6 +34,9 @@ public class Fine {
     @JoinColumn(name = "category_id")
     private FineCategory category;
 
+    @Column(name = "district")
+    private String district;
+
     public Long getId() {
         return id;
     }
@@ -66,6 +69,10 @@ public class Fine {
         return category;
     }
 
+    public String getDistrict() {
+        return district;
+    }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -96,5 +103,9 @@ public class Fine {
 
     public void setCategory(FineCategory category) {
         this.category = category;
+    }
+
+    public void setDistrict(String district) {
+        this.district = district;
     }
 }
