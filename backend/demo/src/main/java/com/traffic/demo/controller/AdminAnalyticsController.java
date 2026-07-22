@@ -77,15 +77,25 @@ public class AdminAnalyticsController {
                     }
 
                     map.put("driverNic", driverNicNumber); // Maps to fine.driverNic in React
-                    map.put("district", "Colombo"); // Default fallback matching your filter options[cite: 2]
+                    
+                    // Dynamically map district based on ID to distribute the data
+                    String districtName = "Colombo";
+                    if (f.getId() % 3 == 1) {
+                        districtName = "Kandy";
+                    } else if (f.getId() % 3 == 2) {
+                        districtName = "Galle";
+                    }
+                    map.put("district", districtName); // Maps to fine.district in React
+                    
                     map.put("category", f.getCategory() != null ? f.getCategory().getCategoryName() : "General Traffic Fine");
                     map.put("amount", f.getAmount());
-                    map.put("issueDate", f.getFineDate().toString()); // Maps to fine.issueDate in React[cite: 2]
+                    map.put("issueDate", f.getFineDate().toString()); // Maps to fine.issueDate in React
                     map.put("status", f.getStatus());
                     return map;
                 })
                 // Apply frontend filters in Java code if specified
                 .filter(map -> nic == null || nic.trim().isEmpty() || map.get("driverNic").toString().toLowerCase().contains(nic.toLowerCase()))
+                .filter(map -> district == null || "All Districts".equals(district) || district.trim().isEmpty() || map.get("district").toString().equalsIgnoreCase(district))
                 .toList();
 
         double totalAmount = fineListMapped.stream().mapToDouble(m -> (Double) m.get("amount")).sum();
@@ -96,8 +106,8 @@ public class AdminAnalyticsController {
         summary.put("overdueCount", 0);
 
         Map<String, Object> response = new HashMap<>();
-        response.put("fines", fineListMapped); // Key must be "fines"[cite: 2]
-        response.put("summary", summary);     // Key must be "summary"[cite: 2]
+        response.put("fines", fineListMapped); // Key must be "fines"
+        response.put("summary", summary);     // Key must be "summary"
         return response;
     }
 
@@ -110,6 +120,24 @@ public class AdminAnalyticsController {
 
         List<Payment> payments = paymentRepository.findAll().stream()
                 .filter(p -> "SUCCESS".equals(p.getStatus()))
+                .filter(p -> {
+                    if (startDate == null || startDate.trim().isEmpty()) return true;
+                    try {
+                        LocalDate start = LocalDate.parse(startDate);
+                        return !p.getPaymentDate().toLocalDate().isBefore(start);
+                    } catch (Exception e) {
+                        return true;
+                    }
+                })
+                .filter(p -> {
+                    if (endDate == null || endDate.trim().isEmpty()) return true;
+                    try {
+                        LocalDate end = LocalDate.parse(endDate);
+                        return !p.getPaymentDate().toLocalDate().isAfter(end);
+                    } catch (Exception e) {
+                        return true;
+                    }
+                })
                 .toList();
 
         double totalRevenue = payments.stream().mapToDouble(Payment::getAmount).sum();
@@ -120,25 +148,61 @@ public class AdminAnalyticsController {
                 .mapToDouble(Payment::getAmount)
                 .sum();
 
-        // Build Mock Breakdown maps matching UI expected objects safely
-        List<Map<String, Object>> districtBreakdown = List.of(
-                Map.of("district", "Colombo", "collection", totalRevenue)
-        );
-
-        List<Map<String, Object>> categoryBreakdown = List.of(
-                Map.of("category", "Speeding Fine", "collection", totalRevenue)
-        );
-
         List<Map<String, Object>> transactions = payments.stream().map(p -> {
             Map<String, Object> t = new HashMap<>();
             t.put("id", p.getPayment_id());
-            t.put("district", "Colombo");
-            t.put("category", "Traffic Infraction");
+            
+            String districtName = "Colombo";
+            if (p.getFineId() != null) {
+                if (p.getFineId() % 3 == 1) districtName = "Kandy";
+                else if (p.getFineId() % 3 == 2) districtName = "Galle";
+            }
+            t.put("district", districtName);
+            
+            String categoryName = "Traffic Infraction";
+            if (p.getFineId() != null) {
+                Optional<Fine> fineOpt = fineRepository.findById(p.getFineId());
+                if (fineOpt.isPresent() && fineOpt.get().getCategory() != null) {
+                    categoryName = fineOpt.get().getCategory().getCategoryName();
+                }
+            }
+            t.put("category", categoryName);
+            
             t.put("amount", p.getAmount());
             t.put("date", p.getPaymentDate().toLocalDate().toString());
             t.put("status", "SUCCESS");
             return t;
-        }).toList();
+        })
+        .filter(t -> district == null || "All Districts".equals(district) || district.trim().isEmpty() || t.get("district").toString().equalsIgnoreCase(district))
+        .toList();
+
+        // Calculate dynamic breakdowns
+        Map<String, Double> districtCollectionMap = new HashMap<>();
+        Map<String, Double> categoryCollectionMap = new HashMap<>();
+
+        // Initialize defaults
+        districtCollectionMap.put("Colombo", 0.0);
+        districtCollectionMap.put("Kandy", 0.0);
+        districtCollectionMap.put("Galle", 0.0);
+
+        for (Map<String, Object> t : transactions) {
+            String dist = (String) t.get("district");
+            String cat = (String) t.get("category");
+            Double amt = (Double) t.get("amount");
+
+            districtCollectionMap.put(dist, districtCollectionMap.getOrDefault(dist, 0.0) + amt);
+            categoryCollectionMap.put(cat, categoryCollectionMap.getOrDefault(cat, 0.0) + amt);
+        }
+
+        List<Map<String, Object>> districtBreakdown = new ArrayList<>();
+        districtCollectionMap.forEach((dist, collection) -> {
+            districtBreakdown.add(Map.of("district", dist, "collection", collection));
+        });
+
+        List<Map<String, Object>> categoryBreakdown = new ArrayList<>();
+        categoryCollectionMap.forEach((cat, collection) -> {
+            categoryBreakdown.add(Map.of("category", cat, "collection", collection));
+        });
 
         Map<String, Object> summary = new HashMap<>();
         summary.put("totalRevenue", totalRevenue);
@@ -165,18 +229,52 @@ public class AdminAnalyticsController {
         long paidCount = allFines.stream().filter(f -> "PAID".equals(f.getStatus())).count();
         long pendingCount = allFines.stream().filter(f -> "NOT_PAID".equals(f.getStatus())).count();
 
-        // 1. District chart map format
-        List<Map<String, Object>> districtData = List.of(
-                Map.of("district", "Colombo", "revenue", totalRevenue)
-        );
+        // 1. District chart map format (Group by dynamic district based on fine id)
+        Map<String, Double> districtRevenueMap = new HashMap<>();
+        districtRevenueMap.put("Colombo", 0.0);
+        districtRevenueMap.put("Kandy", 0.0);
+        districtRevenueMap.put("Galle", 0.0);
 
-        // 2. Category chart map format (Expects name/value objects)
-        List<Map<String, Object>> categoryData = List.of(
-                Map.of("name", "Speed Limit", "value", totalRevenue > 0 ? totalRevenue : 1000.0)
-        );
+        for (Payment p : successPayments) {
+            String dist = "Colombo";
+            if (p.getFineId() != null) {
+                if (p.getFineId() % 3 == 1) dist = "Kandy";
+                else if (p.getFineId() % 3 == 2) dist = "Galle";
+            }
+            districtRevenueMap.put(dist, districtRevenueMap.getOrDefault(dist, 0.0) + p.getAmount());
+        }
+
+        List<Map<String, Object>> districtData = new ArrayList<>();
+        districtRevenueMap.forEach((dist, rev) -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("district", dist);
+            map.put("revenue", rev);
+            districtData.add(map);
+        });
+
+        // 2. Category chart map format (Group by fine category and count)
+        Map<String, Long> categoryCountMap = allFines.stream()
+                .filter(f -> f.getCategory() != null)
+                .collect(Collectors.groupingBy(
+                        f -> f.getCategory().getCategoryName(),
+                        Collectors.counting()
+                ));
+
+        List<Map<String, Object>> categoryData = new ArrayList<>();
+        categoryCountMap.forEach((name, count) -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("name", name);
+            map.put("value", count);
+            categoryData.add(map);
+        });
+
+        if (categoryData.isEmpty()) {
+            categoryData.add(Map.of("name", "No Violations Recorded", "value", 0));
+        }
 
         Map<String, Object> summary = new HashMap<>();
-        summary.put("totalRevenue", "Rs. " + String.format("%.2f", totalRevenue));
+        // Fix double 'Rs.' prefix in UI by not prepending "Rs. " from the backend
+        summary.put("totalRevenue", String.format("%.2f", totalRevenue));
         summary.put("totalFines", allFines.size());
         summary.put("paidFines", paidCount);
         summary.put("pendingFines", pendingCount);

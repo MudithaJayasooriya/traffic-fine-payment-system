@@ -76,7 +76,9 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
 
   // CREATE FINE
   void createFine() async {
-    if (selectedCategory == null || loggedInOfficerId == null || selectedDriver == null) {
+    if (selectedCategory == null ||
+        loggedInOfficerId == null ||
+        selectedDriver == null) {
       setState(() {
         result = "Please select a Category and Offending Driver";
         isSuccess = false;
@@ -137,9 +139,10 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
                       const Text(
                         "Select Violation Category",
                         style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFFFFF6EA)),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFFFF6EA),
+                        ),
                       ),
                       IconButton(
                         icon: const Icon(Icons.close, color: Color(0xFFAACDE9)),
@@ -152,11 +155,20 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
                   // Search Bar inside Modal
                   TextField(
                     autofocus: true,
-                    style: const TextStyle(color: Color(0xFFEAF6FF), fontSize: 14),
+                    style: const TextStyle(
+                      color: Color(0xFFEAF6FF),
+                      fontSize: 14,
+                    ),
                     decoration: InputDecoration(
                       hintText: "Search by Code (e.g. SPD01) or Name...",
-                      hintStyle: const TextStyle(color: Color(0xFF5AA3FF), fontSize: 13),
-                      prefixIcon: const Icon(Icons.search, color: Color(0xFF4AA3FF)),
+                      hintStyle: const TextStyle(
+                        color: Color(0xFF5AA3FF),
+                        fontSize: 13,
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.search,
+                        color: Color(0xFF4AA3FF),
+                      ),
                       filled: true,
                       fillColor: const Color(0xFF06223B),
                       border: OutlineInputBorder(
@@ -172,13 +184,17 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
                   Expanded(
                     child: filtered.isEmpty
                         ? const Center(
-                            child: Text("No matching categories found.",
-                                style: TextStyle(color: Color(0xFFAACDE9))),
+                            child: Text(
+                              "No matching categories found.",
+                              style: TextStyle(color: Color(0xFFAACDE9)),
+                            ),
                           )
                         : ListView.separated(
                             itemCount: filtered.length,
                             separatorBuilder: (_, __) => const Divider(
-                                color: Color(0xFF1F4F78), height: 1),
+                              color: Color(0xFF1F4F78),
+                              height: 1,
+                            ),
                             itemBuilder: (context, index) {
                               final cat = filtered[index];
                               final code = cat['categoryCode'] ?? '';
@@ -187,21 +203,28 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
 
                               return ListTile(
                                 contentPadding: const EdgeInsets.symmetric(
-                                    vertical: 6, horizontal: 8),
+                                  vertical: 6,
+                                  horizontal: 8,
+                                ),
                                 title: Text(
                                   name,
                                   style: const TextStyle(
-                                      color: Color(0xFFFFF6EA),
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14),
+                                    color: Color(0xFFFFF6EA),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
                                 ),
                                 subtitle: Text(
                                   "Code: $code | LKR ${amount.toString()}",
                                   style: const TextStyle(
-                                      color: Color(0xFF4AA3FF), fontSize: 12),
+                                    color: Color(0xFF4AA3FF),
+                                    fontSize: 12,
+                                  ),
                                 ),
-                                trailing: const Icon(Icons.chevron_right,
-                                    color: Color(0xFF5AA3FF)),
+                                trailing: const Icon(
+                                  Icons.chevron_right,
+                                  color: Color(0xFF5AA3FF),
+                                ),
                                 onTap: () {
                                   setState(() {
                                     selectedCategoryObj = cat;
@@ -256,9 +279,10 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
                       const Text(
                         "Select Offending Driver",
                         style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFFFFF6EA)),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFFFF6EA),
+                        ),
                       ),
                       IconButton(
                         icon: const Icon(Icons.close, color: Color(0xFFAACDE9)),
@@ -271,11 +295,20 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
                   // Search Bar inside Modal
                   TextField(
                     autofocus: true,
-                    style: const TextStyle(color: Color(0xFFEAF6FF), fontSize: 14),
+                    style: const TextStyle(
+                      color: Color(0xFFEAF6FF),
+                      fontSize: 14,
+                    ),
                     decoration: InputDecoration(
                       hintText: "Search by Driver ID, Username, or NIC...",
-                      hintStyle: const TextStyle(color: Color(0xFF5AA3FF), fontSize: 13),
-                      prefixIcon: const Icon(Icons.search, color: Color(0xFF4AA3FF)),
+                      hintStyle: const TextStyle(
+                        color: Color(0xFF5AA3FF),
+                        fontSize: 13,
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.search,
+                        color: Color(0xFF4AA3FF),
+                      ),
                       filled: true,
                       fillColor: const Color(0xFF06223B),
                       border: OutlineInputBorder(
@@ -291,13 +324,17 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
                   Expanded(
                     child: filtered.isEmpty
                         ? const Center(
-                            child: Text("No matching drivers found.",
-                                style: TextStyle(color: Color(0xFFAACDE9))),
+                            child: Text(
+                              "No matching drivers found.",
+                              style: TextStyle(color: Color(0xFFAACDE9)),
+                            ),
                           )
                         : ListView.separated(
                             itemCount: filtered.length,
                             separatorBuilder: (_, __) => const Divider(
-                                color: Color(0xFF1F4F78), height: 1),
+                              color: Color(0xFF1F4F78),
+                              height: 1,
+                            ),
                             itemBuilder: (context, index) {
                               final driver = filtered[index];
                               final id = driver['id']?.toString() ?? '';
@@ -306,21 +343,28 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
 
                               return ListTile(
                                 contentPadding: const EdgeInsets.symmetric(
-                                    vertical: 6, horizontal: 8),
+                                  vertical: 6,
+                                  horizontal: 8,
+                                ),
                                 title: Text(
                                   "Driver: $username",
                                   style: const TextStyle(
-                                      color: Color(0xFFFFF6EA),
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14),
+                                    color: Color(0xFFFFF6EA),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
                                 ),
                                 subtitle: Text(
                                   "ID: #$id | NIC: $nic",
                                   style: const TextStyle(
-                                      color: Color(0xFF4AA3FF), fontSize: 12),
+                                    color: Color(0xFF4AA3FF),
+                                    fontSize: 12,
+                                  ),
                                 ),
-                                trailing: const Icon(Icons.chevron_right,
-                                    color: Color(0xFF5AA3FF)),
+                                trailing: const Icon(
+                                  Icons.chevron_right,
+                                  color: Color(0xFF5AA3FF),
+                                ),
                                 onTap: () {
                                   setState(() {
                                     selectedDriverObj = driver;
@@ -361,10 +405,16 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
                     decoration: BoxDecoration(
                       color: const Color(0xFF1FC97A).withOpacity(0.2),
                       shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0xFF1FC97A), width: 3),
+                      border: Border.all(
+                        color: const Color(0xFF1FC97A),
+                        width: 3,
+                      ),
                     ),
-                    child: const Icon(Icons.check_circle_rounded,
-                        size: 56, color: Color(0xFF1FC97A)),
+                    child: const Icon(
+                      Icons.check_circle_rounded,
+                      size: 56,
+                      color: Color(0xFF1FC97A),
+                    ),
                   ),
                   const SizedBox(height: 20),
 
@@ -392,7 +442,9 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
                     decoration: BoxDecoration(
                       color: const Color(0xFF07223A),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFF4AA3FF).withOpacity(0.5)),
+                      border: Border.all(
+                        color: const Color(0xFF4AA3FF).withOpacity(0.5),
+                      ),
                     ),
                     child: Column(
                       children: [
@@ -428,7 +480,8 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const OfficerDashboard()),
+                            builder: (context) => const OfficerDashboard(),
+                          ),
                           (route) => false,
                         );
                       },
@@ -436,11 +489,16 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
                         backgroundColor: const Color(0xFF4AA3FF),
                         foregroundColor: const Color(0xFF021022),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16)),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                       ),
-                      child: const Text("RETURN TO DASHBOARD",
-                          style: TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.bold)),
+                      child: const Text(
+                        "RETURN TO DASHBOARD",
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -458,8 +516,10 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
         backgroundColor: const Color(0xFF07223A),
         foregroundColor: const Color(0xFFEAF6FF),
         elevation: 0,
-        title: const Text("Issue Traffic Fine Ticket",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        title: const Text(
+          "Issue Traffic Fine Ticket",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -476,9 +536,10 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
                     color: const Color(0xFF07223A),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                        color: selectedCategoryObj != null
-                            ? const Color(0xFF4AA3FF)
-                            : const Color(0xFF1F4F78)),
+                      color: selectedCategoryObj != null
+                          ? const Color(0xFF4AA3FF)
+                          : const Color(0xFF1F4F78),
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -486,14 +547,19 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
                       const Text(
                         "Violation Category",
                         style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFFD7A46B)),
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFD7A46B),
+                        ),
                       ),
                       const SizedBox(height: 10),
                       Row(
                         children: [
-                          const Icon(Icons.search, color: Color(0xFF4AA3FF), size: 20),
+                          const Icon(
+                            Icons.search,
+                            color: Color(0xFF4AA3FF),
+                            size: 20,
+                          ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
@@ -511,7 +577,10 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
                               ),
                             ),
                           ),
-                          const Icon(Icons.arrow_drop_down, color: Color(0xFF4AA3FF)),
+                          const Icon(
+                            Icons.arrow_drop_down,
+                            color: Color(0xFF4AA3FF),
+                          ),
                         ],
                       ),
                       if (selectedCategoryObj != null) ...[
@@ -526,12 +595,13 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
                           child: Text(
                             "Fine Amount: LKR ${selectedCategoryObj!['defaultAmount']}",
                             style: const TextStyle(
-                                color: Color(0xFF1FC97A),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13),
+                              color: Color(0xFF1FC97A),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
                           ),
                         ),
-                      ]
+                      ],
                     ],
                   ),
                 ),
@@ -556,9 +626,10 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
                         Text(
                           "Issuing Officer (Logged In)",
                           style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFFD7A46B)),
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFFD7A46B),
+                          ),
                         ),
                         Icon(Icons.lock, color: Color(0xFF5AA3FF), size: 16),
                       ],
@@ -569,19 +640,25 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
                             height: 20,
                             width: 20,
                             child: CircularProgressIndicator(
-                                color: Color(0xFF4AA3FF), strokeWidth: 2),
+                              color: Color(0xFF4AA3FF),
+                              strokeWidth: 2,
+                            ),
                           )
                         : Row(
                             children: [
-                              const Icon(Icons.badge_outlined,
-                                  color: Color(0xFF4AA3FF), size: 20),
+                              const Icon(
+                                Icons.badge_outlined,
+                                color: Color(0xFF4AA3FF),
+                                size: 20,
+                              ),
                               const SizedBox(width: 10),
                               Text(
                                 "ID: #${loggedInOfficerId ?? 'N/A'} — ${loggedInOfficerUsername ?? ''}",
                                 style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFFFFF6EA)),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFFFFF6EA),
+                                ),
                               ),
                             ],
                           ),
@@ -600,9 +677,10 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
                     color: const Color(0xFF07223A),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                        color: selectedDriverObj != null
-                            ? const Color(0xFF4AA3FF)
-                            : const Color(0xFF1F4F78)),
+                      color: selectedDriverObj != null
+                          ? const Color(0xFF4AA3FF)
+                          : const Color(0xFF1F4F78),
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -610,15 +688,19 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
                       const Text(
                         "Offending Driver",
                         style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFFD7A46B)),
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFD7A46B),
+                        ),
                       ),
                       const SizedBox(height: 10),
                       Row(
                         children: [
-                          const Icon(Icons.person_search,
-                              color: Color(0xFF4AA3FF), size: 20),
+                          const Icon(
+                            Icons.person_search,
+                            color: Color(0xFF4AA3FF),
+                            size: 20,
+                          ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
@@ -636,7 +718,10 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
                               ),
                             ),
                           ),
-                          const Icon(Icons.arrow_drop_down, color: Color(0xFF4AA3FF)),
+                          const Icon(
+                            Icons.arrow_drop_down,
+                            color: Color(0xFF4AA3FF),
+                          ),
                         ],
                       ),
                     ],
@@ -653,11 +738,17 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
                   decoration: BoxDecoration(
                     color: Colors.red.shade900.withOpacity(0.3),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.red.shade700.withOpacity(0.5)),
+                    border: Border.all(
+                      color: Colors.red.shade700.withOpacity(0.5),
+                    ),
                   ),
-                  child: Text(result,
-                      style: const TextStyle(
-                          color: Color(0xFFFF8A8A), fontSize: 13)),
+                  child: Text(
+                    result,
+                    style: const TextStyle(
+                      color: Color(0xFFFF8A8A),
+                      fontSize: 13,
+                    ),
+                  ),
                 ),
 
               SizedBox(
@@ -668,10 +759,13 @@ class _CreateFineScreenState extends State<CreateFineScreen> {
                     backgroundColor: const Color(0xFF4AA3FF),
                     foregroundColor: const Color(0xFF021022),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
-                  child: const Text("ISSUE FINE TICKET",
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    "ISSUE FINE TICKET",
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
             ],
